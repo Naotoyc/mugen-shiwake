@@ -429,7 +429,7 @@ const QUESTION_TEMPLATES = [
     generate: (a) => {
       const extra = Math.round(a * 0.1);
       return {
-        question: `仮払金${fmt(a)}円で精算したが、実費は${fmt(a + extra)}円だったため、不足分${fmt(extra)}円を現金で追加支払いした。`,
+        question: `出張旅費の精算をした。仮払金${fmt(a)}円に対し実費は${fmt(a + extra)}円だったため、不足分${fmt(extra)}円を現金で追加支払いした。`,
         debit:  [{ account: '旅費交通費', amount: a + extra }],
         credit: [
           { account: '仮払金', amount: a },
@@ -1526,10 +1526,10 @@ const TEMPLATE_VARIANTS = {
   ],
   // 仮払金精算（不足）
   39: [
-    (a) => `仮払金${fmt(a)}円で精算したが、実費は${fmt(a + Math.round(a * 0.1))}円だったため、不足分${fmt(Math.round(a * 0.1))}円を現金で追加支払いした。`,
-    (a) => `仮払${fmt(a)}円の精算で実費${fmt(a + Math.round(a * 0.1))}円。不足分${fmt(Math.round(a * 0.1))}円を現金追加払い。`,
-    (a) => `出張費実績が仮払金${fmt(a)}円を超過し、差額${fmt(Math.round(a * 0.1))}円を現金で追加精算した。`,
-    (a) => `精算結果：仮払${fmt(a)}円に対し実費${fmt(a + Math.round(a * 0.1))}円。差額${fmt(Math.round(a * 0.1))}円を現金で補填した。`,
+    (a) => `出張旅費の精算をした。仮払金${fmt(a)}円に対し実費は${fmt(a + Math.round(a * 0.1))}円だったため、不足分${fmt(Math.round(a * 0.1))}円を現金で追加支払いした。`,
+    (a) => `出張旅費の精算：仮払${fmt(a)}円、実費${fmt(a + Math.round(a * 0.1))}円。不足分${fmt(Math.round(a * 0.1))}円を現金追加払い。`,
+    (a) => `出張費実績が仮払金${fmt(a)}円を超過し、旅費交通費の差額${fmt(Math.round(a * 0.1))}円を現金で追加精算した。`,
+    (a) => `旅費精算の結果：仮払${fmt(a)}円に対し実費${fmt(a + Math.round(a * 0.1))}円。差額${fmt(Math.round(a * 0.1))}円を現金で補填した。`,
   ],
   // 仮払金→消耗品費
   40: [
