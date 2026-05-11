@@ -1,0 +1,430 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #f0f4f8;
+  --card:       #ffffff;
+  --text:       #1e293b;
+  --text-sub:   #64748b;
+  --border:     #e2e8f0;
+  --accent:     #2563eb;
+  --accent-h:   #1d4ed8;
+  --next:       #16a34a;
+  --next-h:     #15803d;
+  --debit-fg:   #b91c1c;
+  --debit-bg:   #fef2f2;
+  --credit-fg:  #15803d;
+  --credit-bg:  #f0fdf4;
+  --tag-bg:     #eff6ff;
+  --tag-fg:     #1d4ed8;
+  --radius:     14px;
+  --shadow:     0 2px 12px rgba(0,0,0,.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:         #0f172a;
+    --card:       #1e293b;
+    --text:       #e2e8f0;
+    --text-sub:   #94a3b8;
+    --border:     #334155;
+    --accent:     #3b82f6;
+    --accent-h:   #60a5fa;
+    --next:       #22c55e;
+    --next-h:     #4ade80;
+    --debit-fg:   #f87171;
+    --debit-bg:   #1c1010;
+    --credit-fg:  #4ade80;
+    --credit-bg:  #0d1f14;
+    --tag-bg:     #1e3a5f;
+    --tag-fg:     #93c5fd;
+    --shadow:     0 2px 16px rgba(0,0,0,.4);
+  }
+}
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 env(safe-area-inset-bottom);
+}
+
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px 32px;
+}
+
+/* ── Header ── */
+header {
+  padding: 20px 16px 12px;
+  text-align: center;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.site-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  color: var(--accent);
+}
+
+.site-subtitle {
+  font-size: .8rem;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+
+/* ── Intro ── */
+.intro {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 16px;
+  font-size: .875rem;
+  line-height: 1.7;
+  color: var(--text-sub);
+}
+
+.intro p + p { margin-top: 8px; }
+
+.intro strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.badge {
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+/* ── Question card ── */
+.question-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  margin-top: 16px;
+  box-shadow: var(--shadow);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.topic-tag {
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  font-size: .8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.card-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.question-count {
+  font-size: .8rem;
+  color: var(--text-sub);
+}
+
+.score-display {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.question-text {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  font-weight: 500;
+  min-height: 64px;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 56px;
+}
+
+.btn:active { transform: scale(.97); }
+
+.btn-check {
+  background: #7c3aed;
+  color: #fff;
+}
+.btn-check:hover  { background: #6d28d9; }
+.btn-check:disabled { background: #a0a0b0; cursor: not-allowed; transform: none; }
+
+.btn-next {
+  background: var(--next);
+  color: #fff;
+}
+.btn-next:hover { background: var(--next-h); }
+
+.btn-skip {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: var(--text-sub);
+  font-size: .85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.btn-skip:hover { color: var(--text); }
+
+/* ── 解答入力エリア（借方・貸方 横並び） ── */
+.journal-input-wrap {
+  display: flex;
+  flex-direction: row;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.journal-input-block {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 10px 8px;
+}
+
+.journal-input-block + .journal-input-block {
+  border-left: 1px solid var(--border);
+}
+
+/* 縦の仕切り（不要になったが互換維持） */
+.input-divider { display: none; }
+
+.input-side-label {
+  font-size: .8rem;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-align: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.debit-label  { color: var(--debit-fg); }
+.credit-label { color: var(--credit-fg); }
+
+/* 1行 = 科目 + 金額 + × ボタン（横一列） */
+.entry-input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.account-select {
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: .82rem;
+  padding: 0 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount-input {
+  flex-shrink: 0;
+  width: 68px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: .82rem;
+  padding: 0 5px;
+  text-align: right;
+}
+
+.btn-remove-row {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: none;
+  color: var(--text-sub);
+  font-size: .8rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.btn-remove-row:hover { background: var(--debit-bg); color: var(--debit-fg); }
+
+.btn-add-row {
+  display: block;
+  width: 100%;
+  font-size: .8rem;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 5px 0;
+  margin-top: 2px;
+  text-align: center;
+}
+.btn-add-row:hover { border-color: var(--accent); }
+
+/* ── 正解/不正解バッジ ── */
+.result-badge {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+.badge-correct   { background: #eff6ff; color: #1d4ed8; }
+.badge-incorrect { background: #fefce8; color: #854d0e; }
+.badge-skip      { background: var(--bg); color: var(--text-sub); border: 1px solid var(--border); }
+
+@media (prefers-color-scheme: dark) {
+  .badge-correct   { background: #1e3a5f; color: #93c5fd; }
+  .badge-incorrect { background: #2d1f00; color: #fcd34d; }
+}
+
+/* ── Answer section ── */
+#answer-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px dashed var(--border);
+  animation: fadeIn .2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.answer-label {
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+}
+
+/* ── Journal table ── */
+.journal-wrapper { overflow-x: auto; }
+
+.journal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+
+.journal-table thead th {
+  padding: 6px 10px;
+  font-size: .75rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: .03em;
+}
+
+.journal-table thead th:nth-child(1),
+.journal-table thead th:nth-child(2) {
+  color: var(--debit-fg);
+  background: var(--debit-bg);
+}
+
+.journal-table thead th:nth-child(3),
+.journal-table thead th:nth-child(4) {
+  color: var(--credit-fg);
+  background: var(--credit-bg);
+}
+
+.journal-table tbody td {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+}
+
+td.debit-account, td.debit-amount {
+  color: var(--debit-fg);
+  background: var(--debit-bg);
+}
+td.debit-account { font-weight: 600; border-right: 1px solid var(--border); }
+td.debit-amount  { text-align: right; padding-right: 12px; }
+
+td.credit-account, td.credit-amount {
+  color: var(--credit-fg);
+  background: var(--credit-bg);
+}
+td.credit-account { font-weight: 600; padding-left: 16px; }
+td.credit-amount  { text-align: right; padding-right: 12px; }
+
+/* ── Explanation ── */
+.explanation-box {
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 14px;
+  margin-top: 14px;
+  font-size: .875rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+/* ── Footer ── */
+footer {
+  text-align: center;
+  padding: 24px 16px 16px;
+  font-size: .75rem;
+  color: var(--text-sub);
+}
+
+/* ── Utility ── */
+[hidden] { display: none !important; }

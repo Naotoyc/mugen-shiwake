@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>無限仕訳｜簿記3級の仕訳問題をスマホで反復練習</title>
+  <meta name="description" content="簿記3級の第1問対策向け。スマホで仕訳問題を大量反復できる無料Webアプリ。ランダム出題・解説付き。100テンプレート以上・1万パターン生成可能。">
+  <meta name="keywords" content="簿記3級,仕訳,練習,第1問,スマホ,無料,反復">
+  <meta name="author" content="無限仕訳">
+  <!-- OGP -->
+  <meta property="og:title" content="無限仕訳｜簿記3級の仕訳問題をスマホで反復練習">
+  <meta property="og:description" content="簿記3級第1問対策。仕訳をスマホで大量反復できる無料Webアプリ。ランダム出題・解説付き。">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="無限仕訳｜簿記3級 仕訳練習">
+  <meta name="twitter:description" content="簿記3級の仕訳をスマホで大量反復。無料・ランダム出題・解説付き。">
+  <!-- PWA -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="無限仕訳">
+  <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1e293b" media="(prefers-color-scheme: dark)">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="site-title">無限仕訳</div>
+  <div class="site-subtitle">簿記3級 第1問対策 — スマホで仕訳をひたすら反復</div>
+</header>
+
+<div class="container">
+
+  <section class="intro" aria-label="サイト説明">
+    <p>
+      簿記3級の仕訳問題を、スマホでひたすら反復できる<strong>無料ツール</strong>です。
+    </p>
+    <p>
+      問題集を開くのが重く、通勤中にもっとサクサク練習したくて作りました。<br>
+      貸倒引当金・クレジット売掛金・損益振替あたりで毎回混乱していたので、<strong>大量に解いて慣れる</strong>ことを目的にしています。
+    </p>
+    <div class="badges">
+      <span class="badge">100テンプレート以上</span>
+      <span class="badge">1万パターン生成可能</span>
+      <span class="badge">解説付き</span>
+      <span class="badge">無料</span>
+      <span class="badge">登録不要</span>
+    </div>
+  </section>
+
+  <main>
+    <article class="question-card" aria-label="問題">
+      <div class="card-header">
+        <span class="topic-tag" id="topic-tag">—</span>
+        <div class="card-header-right">
+          <span class="question-count" id="question-count">1問目</span>
+          <span class="score-display" id="score-display">0 / 0</span>
+        </div>
+      </div>
+
+      <h1 class="question-text" id="question-text">読み込み中...</h1>
+
+      <!-- 解答入力エリア -->
+      <div class="journal-input-wrap">
+        <div class="journal-input-block">
+          <div class="input-side-label debit-label">借方</div>
+          <div id="debit-input-rows"></div>
+          <button id="add-debit-row" class="btn-add-row" type="button">＋ 行追加</button>
+        </div>
+        <div class="input-divider"></div>
+        <div class="journal-input-block">
+          <div class="input-side-label credit-label">貸方</div>
+          <div id="credit-input-rows"></div>
+          <button id="add-credit-row" class="btn-add-row" type="button">＋ 行追加</button>
+        </div>
+      </div>
+
+      <button class="btn btn-check" id="check-answer-btn" type="button">答え合わせ</button>
+      <button class="btn-skip" id="skip-btn" type="button">答えを見る（スキップ）</button>
+
+      <!-- 解答・解説エリア -->
+      <section id="answer-section" hidden aria-label="解答">
+        <div id="result-badge" class="result-badge"></div>
+
+        <div class="answer-label">正解</div>
+        <div class="journal-wrapper">
+          <table class="journal-table" aria-label="仕訳">
+            <thead>
+              <tr>
+                <th scope="col">借方 科目</th>
+                <th scope="col">借方 金額</th>
+                <th scope="col">貸方 科目</th>
+                <th scope="col">貸方 金額</th>
+              </tr>
+            </thead>
+            <tbody id="journal-body"></tbody>
+          </table>
+        </div>
+
+        <div class="explanation-box" id="explanation-text" aria-label="解説"></div>
+
+        <button class="btn btn-next" id="next-btn" type="button" hidden>
+          次の問題 →
+        </button>
+      </section>
+    </article>
+  </main>
+
+  <footer>
+    <p>簿記3級 第1問対策 ｜ 無限仕訳</p>
+    <p style="margin-top:4px">Enter キーで答え合わせ → 次の問題</p>
+  </footer>
+
+</div>
+
+<script src="questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
