@@ -42,7 +42,12 @@
 <header>
   <div class="site-title">無限仕訳</div>
   <div class="site-subtitle">簿記3級 第1問対策 — スマホで仕訳をひたすら反復</div>
+  <button id="history-btn" class="btn-history" type="button">間違いノート</button>
 </header>
+
+<div id="filter-bar" class="filter-bar">
+  <button id="weak-filter-btn" class="filter-chip weak-btn" type="button" hidden>⚠ 苦手のみ</button>
+</div>
 
 <div class="container">
 
@@ -97,7 +102,22 @@
       <section id="answer-section" hidden aria-label="解答">
         <div id="result-badge" class="result-badge"></div>
 
-        <div class="answer-label">正解</div>
+        <div class="answer-label">あなたの解答</div>
+        <div class="journal-wrapper">
+          <table class="journal-table user-answer-table" aria-label="あなたの解答">
+            <thead>
+              <tr>
+                <th scope="col">借方 科目</th>
+                <th scope="col">借方 金額</th>
+                <th scope="col">貸方 科目</th>
+                <th scope="col">貸方 金額</th>
+              </tr>
+            </thead>
+            <tbody id="user-answer-body"></tbody>
+          </table>
+        </div>
+
+        <div class="answer-label" style="margin-top:14px">正解</div>
         <div class="journal-wrapper">
           <table class="journal-table" aria-label="仕訳">
             <thead>
@@ -127,6 +147,18 @@
   </footer>
 
 </div>
+
+<!-- 間違いノートパネル -->
+<div id="history-panel" hidden>
+  <div class="panel-header">
+    <span class="panel-title">間違いノート</span>
+    <button id="history-close" type="button" class="btn-panel-close">×</button>
+  </div>
+  <div id="history-list"></div>
+</div>
+
+<!-- トースト -->
+<div id="toast" class="toast" aria-live="polite"></div>
 
 <script src="questions.js" defer></script>
 <script src="script.js" defer></script>

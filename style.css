@@ -426,5 +426,178 @@ footer {
   color: var(--text-sub);
 }
 
+/* ── Filter bar ── */
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 10px 16px 0;
+  scrollbar-width: none;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: .8rem;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.filter-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.weak-btn {
+  background: var(--debit-bg);
+  color: var(--debit-fg);
+  border-color: var(--debit-fg);
+  font-weight: 700;
+}
+
+/* ── 金額コピー ── */
+.amt-copy {
+  border-bottom: 1px dashed var(--accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.amt-copy:active { background: var(--tag-bg); border-radius: 2px; }
+
+/* ── トースト ── */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #1e293b;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: .85rem;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
+}
+.toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── あなたの解答テーブル ── */
+.user-answer-table thead th {
+  background: var(--bg);
+  color: var(--text-sub);
+}
+
+/* ── 間違いノートボタン（ヘッダー） ── */
+.btn-history {
+  font-size: .78rem;
+  padding: 5px 12px;
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 6px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── 間違いノートパネル ── */
+#history-panel {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 20;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.panel-title { font-size: 1rem; font-weight: 700; }
+
+.btn-panel-close {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--text-sub);
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.history-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--text-sub);
+  font-size: .9rem;
+}
+
+.history-entry {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 10px 16px;
+  font-size: .875rem;
+}
+.history-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.result-badge-sm {
+  font-size: .78rem;
+  padding: 3px 10px;
+  margin: 0;
+}
+.history-entry-q {
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 4px;
+}
+.history-entry-date {
+  font-size: .75rem;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+.btn-practice {
+  margin-top: 10px;
+  font-size: .8rem;
+  padding: 6px 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-practice:hover { background: var(--accent-h); }
+
+/* ── 小画面: 借方・貸方を縦積み ── */
+@media (max-width: 360px) {
+  .journal-input-wrap { flex-direction: column; }
+  .journal-input-block + .journal-input-block {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
+
 /* ── Utility ── */
 [hidden] { display: none !important; }
