@@ -42,11 +42,26 @@
 <header>
   <div class="site-title">無限仕訳</div>
   <div class="site-subtitle">簿記3級 第1問対策 — スマホで仕訳をひたすら反復</div>
-  <button id="history-btn" class="btn-history" type="button">間違いノート</button>
 </header>
 
-<div id="filter-bar" class="filter-bar">
-  <button id="weak-filter-btn" class="filter-chip weak-btn" type="button" hidden>⚠ 苦手のみ</button>
+<div class="filter-row">
+  <button id="genre-filter-btn" class="btn-genre-filter" type="button">
+    <span id="genre-filter-label">ジャンル：すべて</span>
+    <span class="genre-filter-arrow">▼</span>
+  </button>
+  <button id="weak-filter-btn" class="btn-weak-filter" type="button" hidden>苦手</button>
+</div>
+
+<!-- ジャンル選択シート -->
+<div id="genre-sheet" class="genre-sheet" hidden>
+  <div class="sheet-backdrop" id="genre-backdrop"></div>
+  <div class="sheet-panel">
+    <div class="panel-header">
+      <span class="panel-title">ジャンルで絞り込み</span>
+      <button id="genre-sheet-close" type="button" class="btn-panel-close">×</button>
+    </div>
+    <div id="genre-list"></div>
+  </div>
 </div>
 
 <div class="container">
@@ -79,6 +94,7 @@
       </div>
 
       <h1 class="question-text" id="question-text">読み込み中...</h1>
+      <p class="copy-hint">金額をタップするとコピーできます</p>
 
       <!-- 解答入力エリア -->
       <div class="journal-input-wrap">
@@ -147,6 +163,13 @@
   </footer>
 
 </div>
+
+<!-- 間違いノート FAB -->
+<button id="history-fab" class="history-fab" type="button" aria-label="間違いノート">
+  <span>間違い</span>
+  <span>ノート</span>
+  <span id="history-fab-count" class="fab-badge" hidden>0</span>
+</button>
 
 <!-- 間違いノートパネル -->
 <div id="history-panel" hidden>

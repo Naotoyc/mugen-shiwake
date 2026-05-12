@@ -315,7 +315,7 @@ function checkAnswer() {
     result: ok ? 'correct' : 'incorrect',
     ts: Date.now(),
   });
-  updateWeakTopicBadge();
+  updateUI();
 }
 
 function skipAnswer() {
@@ -339,7 +339,7 @@ function skipAnswer() {
     result: 'skip',
     ts: Date.now(),
   });
-  updateWeakTopicBadge();
+  updateUI();
 }
 
 // ── 問題読み込み ──
@@ -387,60 +387,110 @@ function loadQuestion(templateId = null) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── フィルターバー初期化 ──
-function initFilterBar() {
-  const bar = document.getElementById('filter-bar');
-  const weakBtn = document.getElementById('weak-filter-btn');
+// ── ジャンルシート ──
+function initGenreSheet() {
+  const list = document.getElementById('genre-list');
   const topics = [...new Set(QUESTION_TEMPLATES.map(t => t.topic))].sort();
 
-  const allChip = document.createElement('button');
-  allChip.className = 'filter-chip active';
-  allChip.textContent = 'すべて';
-  allChip.dataset.topic = '';
-  allChip.type = 'button';
-  allChip.addEventListener('click', () => {
+  // すべて
+  const allItem = createGenreItem('すべて', '');
+  allItem.addEventListener('click', () => {
     activeTopics.clear();
-    bar.querySelectorAll('.filter-chip[data-topic]').forEach(c => c.classList.remove('active'));
-    allChip.classList.add('active');
+    syncGenreSheet();
+    updateGenreFilterLabel();
   });
-  bar.insertBefore(allChip, weakBtn);
+  list.appendChild(allItem);
 
+  // 各トピック
   topics.forEach(topic => {
-    const chip = document.createElement('button');
-    chip.className = 'filter-chip';
-    chip.textContent = topic;
-    chip.dataset.topic = topic;
-    chip.type = 'button';
-    chip.addEventListener('click', () => {
-      if (chip.classList.contains('active')) {
-        chip.classList.remove('active');
-        activeTopics.delete(topic);
-      } else {
-        chip.classList.add('active');
-        activeTopics.add(topic);
-        allChip.classList.remove('active');
-      }
-      if (activeTopics.size === 0) allChip.classList.add('active');
+    const item = createGenreItem(topic, topic);
+    item.addEventListener('click', () => {
+      if (activeTopics.has(topic)) activeTopics.delete(topic);
+      else activeTopics.add(topic);
+      syncGenreSheet();
+      updateGenreFilterLabel();
     });
-    bar.insertBefore(chip, weakBtn);
+    list.appendChild(item);
   });
 
-  weakBtn.addEventListener('click', () => {
+  document.getElementById('genre-filter-btn').addEventListener('click', () => {
+    syncGenreSheet();
+    document.getElementById('genre-sheet').hidden = false;
+  });
+  document.getElementById('genre-sheet-close').addEventListener('click', () => {
+    document.getElementById('genre-sheet').hidden = true;
+  });
+  document.getElementById('genre-backdrop').addEventListener('click', () => {
+    document.getElementById('genre-sheet').hidden = true;
+  });
+
+  document.getElementById('weak-filter-btn').addEventListener('click', () => {
     const weak = HistoryManager.getWeakTopics();
     if (weak.length === 0) return;
     activeTopics = new Set(weak);
-    bar.querySelectorAll('.filter-chip[data-topic]').forEach(c => {
-      c.classList.toggle('active', weak.includes(c.dataset.topic));
-    });
-    allChip.classList.toggle('active', activeTopics.size === 0);
+    syncGenreSheet();
+    updateGenreFilterLabel();
   });
 
-  updateWeakTopicBadge();
+  updateUI();
 }
 
-function updateWeakTopicBadge() {
+function createGenreItem(label, topicKey) {
+  const div = document.createElement('div');
+  div.className = 'genre-item';
+  div.dataset.topic = topicKey;
+  div.innerHTML = `<div class="genre-checkbox">✓</div><span class="genre-item-name">${label}</span>`;
+  return div;
+}
+
+function syncGenreSheet() {
+  const list = document.getElementById('genre-list');
+  const weak = HistoryManager.getWeakTopics();
+  list.querySelectorAll('.genre-item').forEach(item => {
+    const key = item.dataset.topic;
+    const isAll = key === '';
+    const checked = isAll ? activeTopics.size === 0 : activeTopics.has(key);
+    item.classList.toggle('checked', checked);
+
+    // 苦手バッジの付け外し
+    let badge = item.querySelector('.genre-weak-badge');
+    if (!isAll && weak.includes(key)) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'genre-weak-badge';
+        badge.textContent = '苦手';
+        item.appendChild(badge);
+      }
+    } else if (badge) {
+      badge.remove();
+    }
+  });
+}
+
+function updateGenreFilterLabel() {
+  const btn = document.getElementById('genre-filter-btn');
+  const label = document.getElementById('genre-filter-label');
+  if (activeTopics.size === 0) {
+    label.textContent = 'ジャンル：すべて';
+    btn.classList.remove('has-filter');
+  } else if (activeTopics.size === 1) {
+    label.textContent = 'ジャンル：' + [...activeTopics][0];
+    btn.classList.add('has-filter');
+  } else {
+    label.textContent = `ジャンル：${[...activeTopics][0]} 他${activeTopics.size - 1}`;
+    btn.classList.add('has-filter');
+  }
+}
+
+function updateUI() {
   const weak = HistoryManager.getWeakTopics();
   document.getElementById('weak-filter-btn').hidden = weak.length === 0;
+
+  const all = HistoryManager.getAll();
+  const mistakeCount = all.filter(e => e.result !== 'correct').length;
+  const fabCount = document.getElementById('history-fab-count');
+  fabCount.textContent = mistakeCount > 99 ? '99+' : mistakeCount;
+  fabCount.hidden = mistakeCount === 0;
 }
 
 // ── 間違いノートパネル描画 ──
@@ -489,7 +539,7 @@ document.getElementById('next-btn').addEventListener('click', () => loadQuestion
 document.getElementById('add-debit-row').addEventListener('click', () => addRow('debit'));
 document.getElementById('add-credit-row').addEventListener('click', () => addRow('credit'));
 
-document.getElementById('history-btn').addEventListener('click', () => {
+document.getElementById('history-fab').addEventListener('click', () => {
   renderHistoryPanel();
   document.getElementById('history-panel').hidden = false;
 });
@@ -506,5 +556,5 @@ document.addEventListener('keydown', e => {
   }
 });
 
-initFilterBar();
+initGenreSheet();
 loadQuestion();
