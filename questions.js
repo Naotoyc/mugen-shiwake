@@ -3144,6 +3144,116 @@ const QUESTION_TEMPLATES = [
       };
     }
   },
+
+  // ===== 仕訳の基本（5要素×貸借のホームポジション） =====
+  {
+    id: 256, topic: '仕訳の基本', tags: ['基本', '資産', '現金', '普通預金'],
+    generate: (a) => ({
+      question: `現金${fmt(a)}円を普通預金口座に預け入れた。`,
+      debit:  [{ account: '普通預金', amount: a }],
+      credit: [{ account: '現金',     amount: a }],
+      explanation: '資産が増えたら借方・減ったら貸方。普通預金（資産↑）借方、現金（資産↓）貸方。資産同士の振替。'
+    })
+  },
+  {
+    id: 257, topic: '仕訳の基本', tags: ['基本', '負債', '借入金'],
+    generate: (a) => ({
+      question: `銀行から${fmt(a)}円を借り入れ、現金で受け取った。`,
+      debit:  [{ account: '現金',   amount: a }],
+      credit: [{ account: '借入金', amount: a }],
+      explanation: '現金（資産↑）は借方。負債は増えたら貸方なので借入金（負債↑）貸方。'
+    })
+  },
+  {
+    id: 258, topic: '仕訳の基本', tags: ['基本', '負債', '借入金', '返済'],
+    generate: (a) => ({
+      question: `借入金${fmt(a)}円を現金で返済した。`,
+      debit:  [{ account: '借入金', amount: a }],
+      credit: [{ account: '現金',   amount: a }],
+      explanation: '負債は減ったら借方なので借入金（負債↓）借方、現金（資産↓）貸方。'
+    })
+  },
+  {
+    id: 259, topic: '仕訳の基本', tags: ['基本', '収益', '売上', '現金'],
+    generate: (a) => ({
+      question: `商品${fmt(a)}円を売り上げ、代金は現金で受け取った。`,
+      debit:  [{ account: '現金', amount: a }],
+      credit: [{ account: '売上', amount: a }],
+      explanation: '現金（資産↑）借方。収益は増えたら貸方なので売上（収益↑）貸方。'
+    })
+  },
+  {
+    id: 260, topic: '仕訳の基本', tags: ['基本', '費用', '仕入', '現金'],
+    generate: (a) => ({
+      question: `商品${fmt(a)}円を仕入れ、代金は現金で支払った。`,
+      debit:  [{ account: '仕入', amount: a }],
+      credit: [{ account: '現金', amount: a }],
+      explanation: '費用は増えたら借方なので仕入（費用↑）借方、現金（資産↓）貸方。'
+    })
+  },
+  {
+    id: 261, topic: '仕訳の基本', tags: ['基本', '費用', '給料'],
+    generate: (a) => ({
+      question: `従業員に給料${fmt(a)}円を現金で支払った。`,
+      debit:  [{ account: '給料', amount: a }],
+      credit: [{ account: '現金', amount: a }],
+      explanation: '給料（費用↑）借方、現金（資産↓）貸方。費用の発生は借方が定位置。'
+    })
+  },
+  {
+    id: 262, topic: '仕訳の基本', tags: ['基本', '資産', '備品'],
+    generate: (a) => ({
+      question: `備品${fmt(a)}円を購入し、代金は現金で支払った。`,
+      debit:  [{ account: '備品', amount: a }],
+      credit: [{ account: '現金', amount: a }],
+      explanation: '備品（資産↑）借方、現金（資産↓）貸方。モノという資産が増えて現金が減る。'
+    })
+  },
+  {
+    id: 263, topic: '仕訳の基本', tags: ['基本', '収益', '受取家賃'],
+    generate: (a) => ({
+      question: `家賃${fmt(a)}円を現金で受け取った。`,
+      debit:  [{ account: '現金',     amount: a }],
+      credit: [{ account: '受取家賃', amount: a }],
+      explanation: '現金（資産↑）借方、受取家賃（収益↑）貸方。受け取る＝収益は貸方。'
+    })
+  },
+  {
+    id: 264, topic: '仕訳の基本', tags: ['基本', '純資産', '資本金'],
+    generate: (a) => ({
+      question: `現金${fmt(a)}円を元入れして開業した。`,
+      debit:  [{ account: '現金',   amount: a }],
+      credit: [{ account: '資本金', amount: a }],
+      explanation: '現金（資産↑）借方。資本金（純資産↑）は貸方が定位置。'
+    })
+  },
+  {
+    id: 265, topic: '仕訳の基本', tags: ['基本', '資産', '売掛金', '回収'],
+    generate: (a) => ({
+      question: `売掛金${fmt(a)}円を現金で回収した。`,
+      debit:  [{ account: '現金',   amount: a }],
+      credit: [{ account: '売掛金', amount: a }],
+      explanation: '現金（資産↑）借方、売掛金（資産↓）貸方。あとで回収する権利が現金に変わる。'
+    })
+  },
+  {
+    id: 266, topic: '仕訳の基本', tags: ['基本', '負債', '買掛金', '支払'],
+    generate: (a) => ({
+      question: `買掛金${fmt(a)}円を現金で支払った。`,
+      debit:  [{ account: '買掛金', amount: a }],
+      credit: [{ account: '現金',   amount: a }],
+      explanation: '買掛金（負債↓）借方、現金（資産↓）貸方。あとで払う義務がなくなる。'
+    })
+  },
+  {
+    id: 267, topic: '仕訳の基本', tags: ['基本', '費用', '支払家賃'],
+    generate: (a) => ({
+      question: `家賃${fmt(a)}円を現金で支払った。`,
+      debit:  [{ account: '支払家賃', amount: a }],
+      credit: [{ account: '現金',     amount: a }],
+      explanation: '支払家賃（費用↑）借方、現金（資産↓）貸方。払う家賃は費用なので借方。'
+    })
+  },
 ];
 
 // ── バリアント（問題文のパターン違い）──
