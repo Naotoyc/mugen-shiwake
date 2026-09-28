@@ -14,6 +14,7 @@ const ACCOUNT_LIST = [
   '消耗品','修繕費','資本金','小口現金',
   '電子記録債権','電子記録債務',
   '支払家賃','受取家賃','保険料','受取手数料',
+  '仮払法人税等','未払法人税等','法人税等','貯蔵品','差入保証金','受取商品券','償却債権取立益',
 ].sort();
 
 function fmt(n) { return n.toLocaleString('ja-JP'); }
@@ -2180,15 +2181,15 @@ const QUESTION_TEMPLATES = [
       const proc    = Math.max(book - (Math.floor(Math.random() * 3) + 1) * 10000, 0);
       const loss    = book - proc;
       return {
-        question: `帳簿価額${fmt(book)}円（取得原価${fmt(cost)}円・減価償却累計額${fmt(prevDep)}円）の備品を期中に${fmt(proc)}円で売却した。なお売却時までの減価償却費${fmt(curDep)}円を月割で計上する。`,
+        question: `取得原価${fmt(cost)}円の備品（期首の減価償却累計額${fmt(prevDep)}円）を期中に${fmt(proc)}円で売却し、代金は現金で受け取った。なお売却時までの当期分減価償却費${fmt(curDep)}円を月割で計上する。`,
         debit:  [
           { account: '現金', amount: proc },
-          { account: '備品減価償却累計額', amount: prevDep + curDep },
+          { account: '備品減価償却累計額', amount: prevDep },
           { account: '減価償却費', amount: curDep },
           { account: '固定資産売却損', amount: loss },
         ],
         credit: [{ account: '備品', amount: cost }],
-        explanation: `売却時に当期分減価償却費${fmt(curDep)}円を計上後、帳簿価額${fmt(book - curDep)}円＞売却額${fmt(proc)}円→損失${fmt(loss)}円。`
+        explanation: `当期分減価償却費${fmt(curDep)}円を計上。累計額は期首分${fmt(prevDep)}円を取り崩す。売却時の帳簿価額${fmt(book)}円＞売却額${fmt(proc)}円なので差額${fmt(loss)}円が固定資産売却損。`
       };
     }
   },
@@ -3253,6 +3254,162 @@ const QUESTION_TEMPLATES = [
       credit: [{ account: '現金',     amount: a }],
       explanation: '支払家賃（費用↑）借方、現金（資産↓）貸方。払う家賃は費用なので借方。'
     })
+  },
+
+  // ===== 法人税等（中間・確定・納付） =====
+  {
+    id: 268, topic: '法人税等', tags: ['法人税等', '仮払法人税等', '中間納付'],
+    generate: (a) => ({
+      question: `法人税等の中間申告を行い、${fmt(a)}円を普通預金から納付した。`,
+      debit:  [{ account: '仮払法人税等', amount: a }],
+      credit: [{ account: '普通預金',     amount: a }],
+      explanation: '中間納付は前払い扱い。仮払法人税等（資産↑）借方、普通預金（資産↓）貸方。確定額から差し引く。'
+    })
+  },
+  {
+    id: 269, topic: '法人税等', tags: ['法人税等', '仮払法人税等', '未払法人税等', '決算'],
+    generate: () => {
+      const total = (Math.floor(Math.random() * 7) + 3) * 100000;
+      const ratio = [0.4, 0.5, 0.6][Math.floor(Math.random() * 3)];
+      const kari  = Math.round(total * ratio / 10000) * 10000;
+      const mibarai = total - kari;
+      return {
+        question: `決算により法人税等が${fmt(total)}円と確定した。中間納付額${fmt(kari)}円を差し引いた残額を未払計上する。`,
+        debit:  [{ account: '法人税等', amount: total }],
+        credit: [
+          { account: '仮払法人税等', amount: kari },
+          { account: '未払法人税等', amount: mibarai },
+        ],
+        explanation: `法人税等（費用）${fmt(total)}円を借方。中間分（仮払法人税等）${fmt(kari)}円を取り崩し、残額${fmt(mibarai)}円を未払法人税等（負債↑）貸方。`
+      };
+    }
+  },
+  {
+    id: 270, topic: '法人税等', tags: ['法人税等', '未払法人税等', '納付'],
+    generate: (a) => ({
+      question: `確定申告により、未払法人税等${fmt(a)}円を普通預金から納付した。`,
+      debit:  [{ account: '未払法人税等', amount: a }],
+      credit: [{ account: '普通預金',     amount: a }],
+      explanation: '未払法人税等（負債↓）借方、普通預金（資産↓）貸方。決算で計上した未払分の納付。'
+    })
+  },
+
+  // ===== 貯蔵品（未使用高の資産振替・再振替） =====
+  {
+    id: 271, topic: '貯蔵品', tags: ['貯蔵品', '租税公課', '決算'],
+    generate: (a) => ({
+      question: `決算にあたり、購入時に租税公課で処理した収入印紙の未使用高${fmt(a)}円を貯蔵品に振り替えた。`,
+      debit:  [{ account: '貯蔵品',   amount: a }],
+      credit: [{ account: '租税公課', amount: a }],
+      explanation: '未使用分は当期の費用でない。貯蔵品（資産↑）借方、租税公課（費用↓）貸方。'
+    })
+  },
+  {
+    id: 272, topic: '貯蔵品', tags: ['貯蔵品', '通信費', '決算'],
+    generate: (a) => ({
+      question: `決算につき、通信費で処理していた郵便切手の未使用高${fmt(a)}円を貯蔵品に振り替えた。`,
+      debit:  [{ account: '貯蔵品', amount: a }],
+      credit: [{ account: '通信費', amount: a }],
+      explanation: '未使用の切手は資産。貯蔵品（資産↑）借方、通信費（費用↓）貸方。'
+    })
+  },
+  {
+    id: 273, topic: '貯蔵品', tags: ['貯蔵品', '租税公課', '再振替'],
+    generate: (a) => ({
+      question: `期首につき、前期末に計上した貯蔵品${fmt(a)}円（収入印紙）を租税公課に再振替した。`,
+      debit:  [{ account: '租税公課', amount: a }],
+      credit: [{ account: '貯蔵品',   amount: a }],
+      explanation: '再振替：貯蔵品（資産↓）貸方、租税公課（費用↑）借方。当期に使う前提で費用へ戻す。'
+    })
+  },
+
+  // ===== 差入保証金（敷金・保証金） =====
+  {
+    id: 274, topic: '差入保証金', tags: ['差入保証金', '普通預金'],
+    generate: (a) => ({
+      question: `事務所賃借にあたり、敷金${fmt(a)}円を普通預金から差し入れた。`,
+      debit:  [{ account: '差入保証金', amount: a }],
+      credit: [{ account: '普通預金',   amount: a }],
+      explanation: '敷金・保証金は将来返還される権利。差入保証金（資産↑）借方、普通預金（資産↓）貸方。費用ではない。'
+    })
+  },
+  {
+    id: 275, topic: '差入保証金', tags: ['差入保証金', '支払家賃', '支払手数料', '複合'],
+    generate: () => {
+      const deposit = (Math.floor(Math.random() * 5) + 2) * 100000;
+      const rent    = (Math.floor(Math.random() * 8) + 8) * 10000;
+      const fee     = (Math.floor(Math.random() * 5) + 5) * 10000;
+      const total   = deposit + rent + fee;
+      return {
+        question: `事務所を賃借し、敷金${fmt(deposit)}円・当月分家賃${fmt(rent)}円・不動産仲介手数料${fmt(fee)}円を普通預金から支払った。`,
+        debit:  [
+          { account: '差入保証金', amount: deposit },
+          { account: '支払家賃',   amount: rent },
+          { account: '支払手数料', amount: fee },
+        ],
+        credit: [{ account: '普通預金', amount: total }],
+        explanation: `敷金→差入保証金（資産）、家賃→支払家賃（費用）、仲介料→支払手数料（費用）。3口を借方、普通預金${fmt(total)}円を貸方に一括。`
+      };
+    }
+  },
+
+  // ===== 受取商品券 =====
+  {
+    id: 276, topic: '受取商品券', tags: ['受取商品券', '売上'],
+    generate: (a) => ({
+      question: `商品${fmt(a)}円を販売し、代金を自治体発行の商品券で受け取った。`,
+      debit:  [{ account: '受取商品券', amount: a }],
+      credit: [{ account: '売上',       amount: a }],
+      explanation: '商品券は後日換金できる債権。受取商品券（資産↑）借方、売上（収益↑）貸方。'
+    })
+  },
+  {
+    id: 277, topic: '受取商品券', tags: ['受取商品券', '普通預金', '精算'],
+    generate: (a) => ({
+      question: `保有する商品券${fmt(a)}円を精算に出し、同額が普通預金に振り込まれた。`,
+      debit:  [{ account: '普通預金',   amount: a }],
+      credit: [{ account: '受取商品券', amount: a }],
+      explanation: '普通預金（資産↑）借方、受取商品券（資産↓）貸方。債権が現金化される。'
+    })
+  },
+
+  // ===== 償却債権取立益 =====
+  {
+    id: 278, topic: '償却債権取立益', tags: ['償却債権取立益', '現金'],
+    generate: (a) => ({
+      question: `前期に貸倒れとして処理した売掛金${fmt(a)}円を、当期に現金で回収した。`,
+      debit:  [{ account: '現金',           amount: a }],
+      credit: [{ account: '償却債権取立益', amount: a }],
+      explanation: '過年度に貸倒処理済みの債権回収。現金（資産↑）借方、償却債権取立益（収益↑）貸方。売掛金は復活させない。'
+    })
+  },
+
+  // ===== 貸倒れ：前期発生 vs 当期発生（引当金の可否） =====
+  {
+    id: 279, topic: '貸倒損失', tags: ['貸倒引当金', '売掛金', '前期発生', '貸倒れ'],
+    generate: () => {
+      const bad      = (Math.floor(Math.random() * 8) + 1) * 10000;
+      const allowBal = bad + (Math.floor(Math.random() * 5) + 1) * 10000;
+      return {
+        question: `前期に発生した売掛金${fmt(bad)}円が貸し倒れた。貸倒引当金の残高は${fmt(allowBal)}円である。`,
+        debit:  [{ account: '貸倒引当金', amount: bad }],
+        credit: [{ account: '売掛金',     amount: bad }],
+        explanation: `前期発生の売掛金は引当金の対象。残高${fmt(allowBal)}円で全額充当できるので、貸倒引当金（資産控除↓）借方、売掛金（資産↓）貸方。貸倒損失は使わない。`
+      };
+    }
+  },
+  {
+    id: 280, topic: '貸倒損失', tags: ['貸倒損失', '売掛金', '当期発生', '貸倒れ'],
+    generate: () => {
+      const bad      = (Math.floor(Math.random() * 8) + 1) * 10000;
+      const allowBal = (Math.floor(Math.random() * 7) + 3) * 10000;
+      return {
+        question: `当期に販売した商品の売掛金${fmt(bad)}円が貸し倒れた。なお貸倒引当金の残高が${fmt(allowBal)}円ある。`,
+        debit:  [{ account: '貸倒損失', amount: bad }],
+        credit: [{ account: '売掛金',   amount: bad }],
+        explanation: `当期発生の売掛金は当期末の引当対象で、まだ引当金が設定されていない。引当金残高があっても使わず、全額を貸倒損失（費用↑）借方、売掛金（資産↓）貸方。`
+      };
+    }
   },
 ];
 
