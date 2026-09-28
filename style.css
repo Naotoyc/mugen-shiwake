@@ -470,6 +470,37 @@ footer {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Difficulty chips ── */
+.difficulty-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px 0;
+  flex-wrap: wrap;
+}
+.difficulty-label {
+  font-size: .75rem;
+  color: var(--text-sub);
+  margin-right: 2px;
+}
+.diff-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text-sub);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.diff-chip.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
 /* ── Genre sheet ── */
 .genre-sheet {
   position: fixed;

@@ -5,6 +5,56 @@ let currentOptions   = [];
 let questionCount    = 0;
 let score = { correct: 0, total: 0 };
 let activeTopics = new Set();
+let activeDifficulties = new Set(['basic', 'standard', 'hard']);
+const DIFF_KEY = 'mugen_shiwake_difficulty';
+
+// 計算・複合仕訳を伴う試験レベルのトピック
+const HARD_TOPICS = new Set([
+  '減価償却費', '貸倒引当金繰入', '貸倒引当金戻入', '貸倒損失', '消費税',
+  'クレジット売掛金', '固定資産売却益', '固定資産売却損', '損益振替', '訂正仕訳',
+  '法人税等', '貯蔵品', '差入保証金', '受取商品券', '償却債権取立益', '現金過不足',
+]);
+
+// 各テンプレートに _difficulty（basic/standard/hard）を付与
+function classifyDifficulty() {
+  QUESTION_TEMPLATES.forEach(t => {
+    if (t.topic === '仕訳の基本') { t._difficulty = 'basic'; return; }
+    let compound = false;
+    try {
+      const s = t.generate.length > 0 ? t.generate(10000) : t.generate();
+      compound = s.debit.length >= 2 || s.credit.length >= 2;
+    } catch { /* noop */ }
+    t._difficulty = (HARD_TOPICS.has(t.topic) || compound || t.generate.length === 0)
+      ? 'hard' : 'standard';
+  });
+}
+
+function loadDifficultyPref() {
+  try {
+    const s = JSON.parse(localStorage.getItem(DIFF_KEY));
+    if (Array.isArray(s) && s.length > 0) activeDifficulties = new Set(s);
+  } catch { /* noop */ }
+}
+function saveDifficultyPref() {
+  try { localStorage.setItem(DIFF_KEY, JSON.stringify([...activeDifficulties])); } catch { /* noop */ }
+}
+
+function initDifficultyChips() {
+  document.querySelectorAll('.diff-chip').forEach(chip => {
+    const d = chip.dataset.diff;
+    chip.classList.toggle('active', activeDifficulties.has(d));
+    chip.addEventListener('click', () => {
+      if (activeDifficulties.has(d)) {
+        if (activeDifficulties.size === 1) return; // 最低1つは残す
+        activeDifficulties.delete(d);
+      } else {
+        activeDifficulties.add(d);
+      }
+      chip.classList.toggle('active', activeDifficulties.has(d));
+      saveDifficultyPref();
+    });
+  });
+}
 
 // ── HistoryManager ──
 const HistoryManager = {
@@ -390,9 +440,15 @@ function loadQuestion(templateId = null) {
   if (templateId !== null) {
     const found = QUESTION_TEMPLATES.filter(t => t.id === templateId);
     if (found.length > 0) pool = found;
-  } else if (activeTopics.size > 0) {
-    const filtered = QUESTION_TEMPLATES.filter(t => activeTopics.has(t.topic));
-    if (filtered.length > 0) pool = filtered;
+  } else {
+    if (activeTopics.size > 0) {
+      const byTopic = pool.filter(t => activeTopics.has(t.topic));
+      if (byTopic.length > 0) pool = byTopic;
+    }
+    if (activeDifficulties.size > 0 && activeDifficulties.size < 3) {
+      const byDiff = pool.filter(t => activeDifficulties.has(t._difficulty));
+      if (byDiff.length > 0) pool = byDiff; // 該当なしなら難易度条件は無視（フォールバック）
+    }
   }
 
   const tmpl = pool[Math.floor(Math.random() * pool.length)];
@@ -598,5 +654,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
+classifyDifficulty();
+loadDifficultyPref();
+initDifficultyChips();
 initGenreSheet();
 loadQuestion();
