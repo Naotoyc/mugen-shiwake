@@ -6,7 +6,13 @@ let questionCount    = 0;
 let score = { correct: 0, total: 0 };
 let activeTopics = new Set();
 let activeDifficulties = new Set(['basic', 'standard', 'hard']);
+let weakOnly = false;
 const DIFF_KEY = 'mugen_shiwake_difficulty';
+
+// ── GA4 イベント送信（gtag未読込でも安全）──
+function track(name, params) {
+  try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch { /* noop */ }
+}
 
 // 計算・複合仕訳を伴う試験レベルのトピック
 const HARD_TOPICS = new Set([
@@ -52,6 +58,7 @@ function initDifficultyChips() {
       }
       chip.classList.toggle('active', activeDifficulties.has(d));
       saveDifficultyPref();
+      track('filter_difficulty', { active: [...activeDifficulties].join(',') });
     });
   });
 }
@@ -407,6 +414,12 @@ function checkAnswer() {
     result: ok ? 'correct' : 'incorrect',
     ts: Date.now(),
   });
+  track('answer_check', {
+    topic: currentQuestion.topic,
+    difficulty: currentQuestion._difficulty || 'unknown',
+    result: ok ? 'correct' : 'incorrect',
+    question_id: currentQuestion._tmplId,
+  });
   updateUI();
 }
 
@@ -431,6 +444,11 @@ function skipAnswer() {
     result: 'skip',
     ts: Date.now(),
   });
+  track('answer_skip', {
+    topic: currentQuestion.topic,
+    difficulty: currentQuestion._difficulty || 'unknown',
+    question_id: currentQuestion._tmplId,
+  });
   updateUI();
 }
 
@@ -449,6 +467,11 @@ function loadQuestion(templateId = null) {
       const byDiff = pool.filter(t => activeDifficulties.has(t._difficulty));
       if (byDiff.length > 0) pool = byDiff; // 該当なしなら難易度条件は無視（フォールバック）
     }
+    if (weakOnly) {
+      const weak = new Set(HistoryManager.getWeakTopics());
+      const byWeak = pool.filter(t => weak.has(t.topic));
+      if (byWeak.length > 0) pool = byWeak; // 苦手×難易度のANDで残す
+    }
   }
 
   const tmpl = pool[Math.floor(Math.random() * pool.length)];
@@ -462,6 +485,7 @@ function loadQuestion(templateId = null) {
   }
   currentQuestion.topic = tmpl.topic;
   currentQuestion._tmplId = tmpl.id;
+  currentQuestion._difficulty = tmpl._difficulty;
 
   const correctAccounts = [
     ...currentQuestion.debit.map(e => e.account),
@@ -523,14 +547,19 @@ function initGenreSheet() {
   });
 
   document.getElementById('weak-filter-btn').addEventListener('click', () => {
-    const weak = HistoryManager.getWeakTopics();
-    if (weak.length === 0) return;
-    activeTopics = new Set(weak);
-    syncGenreSheet();
-    updateGenreFilterLabel();
+    if (HistoryManager.getWeakTopics().length === 0) { weakOnly = false; }
+    else { weakOnly = !weakOnly; }
+    updateWeakBtn();
+    track('filter_weak', { on: weakOnly });
   });
 
   updateUI();
+}
+
+function updateWeakBtn() {
+  const btn = document.getElementById('weak-filter-btn');
+  btn.classList.toggle('active', weakOnly);
+  btn.textContent = weakOnly ? '苦手のみ ✓' : '苦手';
 }
 
 function createGenreItem(label, topicKey) {
@@ -583,6 +612,8 @@ function updateGenreFilterLabel() {
 function updateUI() {
   const weak = HistoryManager.getWeakTopics();
   document.getElementById('weak-filter-btn').hidden = weak.length === 0;
+  if (weak.length === 0 && weakOnly) { weakOnly = false; }
+  updateWeakBtn();
 
   const all = HistoryManager.getAll();
   const mistakeCount = all.filter(e => e.result !== 'correct').length;

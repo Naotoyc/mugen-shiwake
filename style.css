@@ -469,6 +469,10 @@ footer {
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
+.btn-weak-filter.active {
+  background: var(--debit-fg);
+  color: #fff;
+}
 
 /* ── Difficulty chips ── */
 .difficulty-row {
