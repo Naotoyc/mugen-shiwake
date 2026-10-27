@@ -183,6 +183,7 @@
     <a class="btn btn-next cta" href="../../?topic=%E6%B3%95%E4%BA%BA%E7%A8%8E%E7%AD%89">「法人税等」の問題を無限に解く →</a>
     <p class="cta-note">金額がランダムに変わる同じ論点の問題を、答え合わせ・解説付きで何問でも解けます。無料・登録不要。</p>
     
+    
   </main>
   <footer>
     <p><a href="../../">無限仕訳</a> ｜ <a href="../../topics/">論点一覧</a></p>
@@ -211,6 +212,11 @@
   });
   document.querySelectorAll('a.cta').forEach(function (a) {
     a.addEventListener('click', function () { track('topic_page_to_app', { href: a.getAttribute('href') }); });
+  });
+  document.querySelectorAll('.promo a[data-aff]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      track('affiliate_click', { id: a.dataset.aff, kind: a.dataset.kind, place: a.dataset.place });
+    });
   });
 })();
 </script>

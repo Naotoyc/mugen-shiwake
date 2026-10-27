@@ -310,6 +310,7 @@
         <li><a href="../kurikoshi-rieki-joyokin/">繰越利益剰余金<span class="topic-count">5問</span></a></li><li><a href="../uriage/">売上<span class="topic-count">7問</span></a></li><li><a href="../shiire/">仕入<span class="topic-count">8問</span></a></li><li><a href="../uketori-yachin/">受取家賃<span class="topic-count">2問</span></a></li><li><a href="../shiharai-yachin/">支払家賃<span class="topic-count">2問</span></a></li>
       </ul>
     </section>
+    
   </main>
   <footer>
     <p><a href="../../">無限仕訳</a> ｜ <a href="../../topics/">論点一覧</a></p>
@@ -338,6 +339,11 @@
   });
   document.querySelectorAll('a.cta').forEach(function (a) {
     a.addEventListener('click', function () { track('topic_page_to_app', { href: a.getAttribute('href') }); });
+  });
+  document.querySelectorAll('.promo a[data-aff]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      track('affiliate_click', { id: a.dataset.aff, kind: a.dataset.kind, place: a.dataset.place });
+    });
   });
 })();
 </script>

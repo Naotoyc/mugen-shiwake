@@ -699,6 +699,49 @@ function renderAskAI() {
   document.getElementById('ask-chatgpt').href = AI_LINKS.chatgpt + enc;
   document.getElementById('ask-claude').href  = AI_LINKS.claude  + enc;
   box.hidden = false;
+  renderPromoCard();
+}
+
+// ── 教材・講座カード（PR）: 10問ごとに1回、閉じたらそのセッションでは出さない ──
+const PROMO_EVERY = 10;
+const PROMO_DISMISS_KEY = 'mugen_shiwake_promo_dismissed';
+function renderPromoCard() {
+  const card = document.getElementById('promo-card');
+  if (!card) return;
+  const items = (typeof AFFILIATES !== 'undefined' ? AFFILIATES : []).filter(a => a.url);
+  let dismissed = false;
+  try { dismissed = sessionStorage.getItem(PROMO_DISMISS_KEY) === '1'; } catch { /* noop */ }
+  if (items.length === 0 || dismissed || questionCount % PROMO_EVERY !== 0) {
+    card.hidden = true;
+    return;
+  }
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  card.innerHTML = `
+    <div class="promo-head">
+      <h2 class="section-title">${questionCount}問おつかれさま。紙や講座で固めるなら</h2>
+      <span class="pr-tag">PR</span>
+    </div>
+    <ul class="promo-list">
+      ${items.map(a => `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}">
+        <span class="promo-label">${esc(a.label)}</span>
+        <span class="promo-lead">${esc(a.lead)}</span>
+      </a></li>`).join('')}
+    </ul>
+    <p class="promo-note">※アフィリエイトリンクを含みます。</p>
+    <button class="promo-close" type="button">このセッションでは表示しない</button>
+  `;
+  card.querySelectorAll('a[data-aff]').forEach(a => {
+    a.addEventListener('click', () => {
+      track('affiliate_click', { id: a.dataset.aff, kind: a.dataset.kind, place: 'app', question_count: questionCount });
+    });
+  });
+  card.querySelector('.promo-close').addEventListener('click', () => {
+    try { sessionStorage.setItem(PROMO_DISMISS_KEY, '1'); } catch { /* noop */ }
+    card.hidden = true;
+    track('affiliate_dismiss', { question_count: questionCount });
+  });
+  card.hidden = false;
+  track('affiliate_view', { place: 'app', question_count: questionCount });
 }
 function initAskAI() {
   const box = document.getElementById('ask-ai');

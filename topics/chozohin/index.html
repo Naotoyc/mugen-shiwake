@@ -184,6 +184,7 @@
         <li><a href="../sozei-koka/">租税公課<span class="topic-count">5問</span></a></li><li><a href="../tsushinhi/">通信費<span class="topic-count">5問</span></a></li>
       </ul>
     </section>
+    
   </main>
   <footer>
     <p><a href="../../">無限仕訳</a> ｜ <a href="../../topics/">論点一覧</a></p>
@@ -212,6 +213,11 @@
   });
   document.querySelectorAll('a.cta').forEach(function (a) {
     a.addEventListener('click', function () { track('topic_page_to_app', { href: a.getAttribute('href') }); });
+  });
+  document.querySelectorAll('.promo a[data-aff]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      track('affiliate_click', { id: a.dataset.aff, kind: a.dataset.kind, place: a.dataset.place });
+    });
   });
 })();
 </script>

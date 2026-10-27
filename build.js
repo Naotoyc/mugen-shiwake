@@ -7,6 +7,7 @@
 const fs   = require('fs');
 const path = require('path');
 const { QUESTION_TEMPLATES } = require('./questions.js');
+const { AFFILIATES } = require('./affiliates.js');
 
 const SITE_URL   = 'https://naotoyc.github.io/mugen-shiwake/';
 const SITE_NAME  = '無限仕訳';
@@ -134,6 +135,26 @@ function buildAiPrompt(q) {
     '', '【質問】', '（ここに聞きたいことを書いてください。例: なぜこの科目が借方になるのか？）',
   ].join('\n');
 }
+// 教材・講座（アフィリエイト）。url が入っている項目だけ出す。無ければブロックごと出さない。
+function affiliateBlock(heading, place) {
+  const items = AFFILIATES.filter(a => a.url);
+  if (items.length === 0) return '';
+  return `
+    <section class="promo" aria-label="教材・講座（PR）">
+      <div class="promo-head">
+        <h2 class="section-title">${esc(heading)}</h2>
+        <span class="pr-tag">PR</span>
+      </div>
+      <ul class="promo-list">
+        ${items.map(a => `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${a.id}" data-kind="${a.kind}" data-place="${place}">
+          <span class="promo-label">${esc(a.label)}</span>
+          <span class="promo-lead">${esc(a.lead)}</span>
+        </a></li>`).join('\n        ')}
+      </ul>
+      <p class="promo-note">※アフィリエイトリンクを含みます。購入・申込があった場合、当サイトに報酬が入ることがあります。</p>
+    </section>`;
+}
+
 function askAiBlock(q, topic) {
   const prompt = buildAiPrompt(q);
   const enc = encodeURIComponent(prompt);
@@ -246,6 +267,11 @@ function foot(cssPrefix) {
   });
   document.querySelectorAll('a.cta').forEach(function (a) {
     a.addEventListener('click', function () { track('topic_page_to_app', { href: a.getAttribute('href') }); });
+  });
+  document.querySelectorAll('.promo a[data-aff]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      track('affiliate_click', { id: a.dataset.aff, kind: a.dataset.kind, place: a.dataset.place });
+    });
   });
 })();
 </script>
@@ -362,6 +388,7 @@ function topicPage(name) {
     <a class="btn btn-next cta" href="${appHref}">「${esc(name)}」の問題を無限に解く →</a>
     <p class="cta-note">金額がランダムに変わる同じ論点の問題を、答え合わせ・解説付きで何問でも解けます。無料・登録不要。</p>
     ${relatedHtml}
+    ${affiliateBlock(`「${name}」を紙や講座で固めるなら`, 'topic_page')}
   </main>` + foot('../../');
 }
 
@@ -406,6 +433,7 @@ function indexPage() {
     <h2 class="section-title">頻出の基本論点（標準）</h2>${list(groups.standard)}
     <h2 class="section-title">差がつく論点（試験レベル）</h2>${list(groups.hard)}
     <a class="btn btn-next cta" href="../">全論点をアプリで反復練習 →</a>
+    ${affiliateBlock('仕訳以外も含めて仕上げるなら', 'topics_index')}
   </main>` + foot('../');
 }
 

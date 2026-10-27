@@ -463,6 +463,82 @@ td.credit-amount  { text-align: right; padding-right: 12px; }
 }
 .ask-ai-btn:active { transform: scale(.97); }
 
+/* ── 教材・講座（PR） ── */
+.promo { margin-top: 20px; }
+.promo-card {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+}
+.promo-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.promo-head .section-title { margin: 0; }
+.promo-card .promo-head .section-title {
+  font-size: .95rem;
+  border-left: none;
+  padding-left: 0;
+}
+.pr-tag {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--text-sub);
+  color: var(--text-sub);
+}
+.promo-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.promo-list a {
+  display: block;
+  padding: 11px 13px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+.promo-list a:active { transform: scale(.98); }
+.promo-label {
+  display: block;
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--accent);
+}
+.promo-lead {
+  display: block;
+  font-size: .8rem;
+  color: var(--text-sub);
+  margin-top: 2px;
+}
+.promo-note {
+  font-size: .72rem;
+  color: var(--text-sub);
+  margin: 8px 0 0;
+}
+.promo-close {
+  margin-top: 8px;
+  background: none;
+  border: none;
+  color: var(--text-sub);
+  font-size: .78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px 0;
+}
+
 footer {
   text-align: center;
   padding: 24px 16px 16px;

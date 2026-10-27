@@ -183,6 +183,9 @@
           </div>
         </div>
 
+        <!-- 10問ごとに1回だけ出す教材・講座カード（affiliates.js に url が無ければ出ない） -->
+        <section id="promo-card" class="promo promo-card" hidden aria-label="教材・講座（PR）"></section>
+
         <button class="btn btn-next" id="next-btn" type="button" hidden>
           次の問題 →
         </button>
@@ -217,6 +220,7 @@
 <div id="toast" class="toast" aria-live="polite"></div>
 
 <script src="questions.js" defer></script>
+<script src="affiliates.js" defer></script>
 <script src="script.js" defer></script>
 </body>
 </html>

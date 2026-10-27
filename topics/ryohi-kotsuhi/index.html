@@ -278,6 +278,7 @@
         <li><a href="../karibaraikin/">仮払金<span class="topic-count">6問</span></a></li><li><a href="../genkin/">現金<span class="topic-count">10問</span></a></li><li><a href="../futsu-yokin/">普通預金<span class="topic-count">7問</span></a></li>
       </ul>
     </section>
+    
   </main>
   <footer>
     <p><a href="../../">無限仕訳</a> ｜ <a href="../../topics/">論点一覧</a></p>
@@ -306,6 +307,11 @@
   });
   document.querySelectorAll('a.cta').forEach(function (a) {
     a.addEventListener('click', function () { track('topic_page_to_app', { href: a.getAttribute('href') }); });
+  });
+  document.querySelectorAll('.promo a[data-aff]').forEach(function (a) {
+    a.addEventListener('click', function () {
+      track('affiliate_click', { id: a.dataset.aff, kind: a.dataset.kind, place: a.dataset.place });
+    });
   });
 })();
 </script>
