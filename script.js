@@ -399,6 +399,7 @@ function checkAnswer() {
   renderUserAnswerTable(userDebit, userCredit);
   renderJournalTable(currentQuestion.debit, currentQuestion.credit);
   document.getElementById('explanation-text').textContent = currentQuestion.explanation;
+  renderAskAI();
   document.getElementById('answer-section').hidden = false;
   document.getElementById('check-answer-btn').disabled = true;
   document.getElementById('next-btn').hidden = false;
@@ -429,6 +430,7 @@ function skipAnswer() {
   renderUserAnswerTable([], []);
   renderJournalTable(currentQuestion.debit, currentQuestion.credit);
   document.getElementById('explanation-text').textContent = currentQuestion.explanation;
+  renderAskAI();
   document.getElementById('answer-section').hidden = false;
   document.getElementById('check-answer-btn').disabled = true;
   document.getElementById('next-btn').hidden = false;
@@ -661,6 +663,63 @@ function renderHistoryPanel() {
   });
 }
 
+// ── 論点ページ（topics/）からの遷移: ?topic=現金,売掛金 で絞り込み済みの状態で開始 ──
+function applyTopicFromURL() {
+  const raw = new URLSearchParams(location.search).get('topic');
+  if (!raw) return;
+  const known = new Set(QUESTION_TEMPLATES.map(t => t.topic));
+  raw.split(',').map(s => s.trim()).filter(t => known.has(t)).forEach(t => activeTopics.add(t));
+  if (activeTopics.size === 0) return;
+  updateGenreFilterLabel();
+  track('open_from_topic_page', { topic: [...activeTopics].join(',') });
+}
+
+// ── AIに質問（外部AIに問題文つきで飛ばす。API費用なし） ──
+// build.js の buildAiPrompt / AI_LINKS と同じ形式にしておく。
+const AI_LINKS = {
+  chatgpt: 'https://chatgpt.com/?q=',
+  claude:  'https://claude.ai/new?q=',
+};
+function buildAiPrompt(q) {
+  const line = e => `${e.account} ${e.amount.toLocaleString('ja-JP')}`;
+  return [
+    '簿記3級の仕訳問題について質問です。借方・貸方の増減の考え方から、初心者にも分かるように説明してください。',
+    '', '【問題】', q.question,
+    '', '【正解の仕訳】',
+    '借方: ' + q.debit.map(line).join(' ／ '),
+    '貸方: ' + q.credit.map(line).join(' ／ '),
+    '', '【解説】', q.explanation,
+    '', '【質問】', '（ここに聞きたいことを書いてください。例: なぜこの科目が借方になるのか？）',
+  ].join('\n');
+}
+function renderAskAI() {
+  const box = document.getElementById('ask-ai');
+  if (!box || !currentQuestion) return;
+  const enc = encodeURIComponent(buildAiPrompt(currentQuestion));
+  document.getElementById('ask-chatgpt').href = AI_LINKS.chatgpt + enc;
+  document.getElementById('ask-claude').href  = AI_LINKS.claude  + enc;
+  box.hidden = false;
+}
+function initAskAI() {
+  const box = document.getElementById('ask-ai');
+  if (!box) return;
+  ['chatgpt', 'claude'].forEach(p => {
+    document.getElementById(`ask-${p}`).addEventListener('click', () => {
+      track('ask_ai', { provider: p, topic: currentQuestion && currentQuestion.topic, source: 'app' });
+    });
+  });
+  const copyBtn = document.getElementById('ask-copy');
+  copyBtn.addEventListener('click', () => {
+    if (!currentQuestion) return;
+    const label = copyBtn.textContent;
+    navigator.clipboard.writeText(buildAiPrompt(currentQuestion)).then(() => {
+      copyBtn.textContent = 'コピーしました';
+      setTimeout(() => { copyBtn.textContent = label; }, 1500);
+    });
+    track('ask_ai', { provider: 'copy', topic: currentQuestion.topic, source: 'app' });
+  });
+}
+
 // ── イベントリスナー ──
 document.getElementById('check-answer-btn').addEventListener('click', checkAnswer);
 document.getElementById('skip-btn').addEventListener('click', skipAnswer);
@@ -689,4 +748,6 @@ classifyDifficulty();
 loadDifficultyPref();
 initDifficultyChips();
 initGenreSheet();
+initAskAI();
+applyTopicFromURL();
 loadQuestion();

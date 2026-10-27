@@ -7,6 +7,7 @@
   <meta name="description" content="簿記3級の第1問対策向け。スマホで仕訳問題を大量反復できる無料Webアプリ。ランダム出題・解説付き。100テンプレート以上・1万パターン生成可能。">
   <meta name="keywords" content="簿記3級,仕訳,練習,第1問,スマホ,無料,反復">
   <meta name="author" content="無限仕訳">
+  <link rel="canonical" href="https://naotoyc.github.io/mugen-shiwake/">
   <!-- OGP -->
   <meta property="og:title" content="無限仕訳｜簿記3級の仕訳問題をスマホで反復練習">
   <meta property="og:description" content="簿記3級第1問対策。仕訳をスマホで大量反復できる無料Webアプリ。ランダム出題・解説付き。">
@@ -36,6 +37,21 @@
     gtag('config', 'G-Y078QDMH2J');
   </script>
   <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "無限仕訳",
+    "url": "https://naotoyc.github.io/mugen-shiwake/",
+    "description": "簿記3級の第1問対策向け。スマホで仕訳問題を大量反復できる無料Webアプリ。ランダム出題・解説付き。",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any",
+    "inLanguage": "ja",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+    "image": "https://naotoyc.github.io/mugen-shiwake/mugen-shiwake-ogp.png"
+  }
+  </script>
 </head>
 <body>
 
@@ -88,6 +104,7 @@
       <span class="badge">無料</span>
       <span class="badge">登録不要</span>
     </div>
+    <p class="topics-link"><a href="topics/">論点別の例題と解説を見る →</a></p>
   </section>
 
   <main>
@@ -156,6 +173,15 @@
         </div>
 
         <div class="explanation-box" id="explanation-text" aria-label="解説"></div>
+
+        <div class="ask-ai" id="ask-ai" hidden>
+          <div class="ask-ai-label">この問題をAIに質問する（問題文つきで開きます）</div>
+          <div class="ask-ai-row">
+            <a id="ask-chatgpt" class="ask-ai-btn" target="_blank" rel="noopener" href="#">ChatGPT</a>
+            <a id="ask-claude" class="ask-ai-btn" target="_blank" rel="noopener" href="#">Claude</a>
+            <button id="ask-copy" class="ask-ai-btn" type="button">質問文をコピー</button>
+          </div>
+        </div>
 
         <button class="btn btn-next" id="next-btn" type="button" hidden>
           次の問題 →

@@ -38,9 +38,35 @@ mugen-shiwake/
 ├── index.html    # メインページ（SEO・OGP設定済み）
 ├── style.css     # スタイル（モバイルファースト・ダークモード対応）
 ├── script.js     # 問題表示ロジック
-├── questions.js  # 100問テンプレート + ランダム金額生成
+├── questions.js  # 問題テンプレート + ランダム金額生成
+├── build.js      # 論点ページ・sitemap.xml・robots.txt の生成スクリプト
+├── topics.css    # 論点ページ専用スタイル
+├── topics/       # 生成物: 論点別の例題と解説ページ（直接編集しない）
+├── sitemap.xml   # 生成物
+├── robots.txt    # 生成物
 └── README.md
 ```
+
+## 論点ページの生成（SEO用）
+
+`questions.js` の各テンプレートから、論点ごとの静的な解説ページを生成します。
+GitHub Pages はビルドを走らせないので、**生成物もコミットする**。
+
+```bash
+node build.js
+```
+
+- 出力: `topics/index.html`（論点一覧）、`topics/<slug>/index.html`（論点別）、`sitemap.xml`、`robots.txt`
+- 例題の金額・内容は id から決定的に生成（ビルドのたびに差分が出ない）
+- `questions.js` に新しい `topic` を追加したら、`build.js` の `SLUGS` にスラッグも追加する（無いとビルドが止まる）
+- 論点ページの CTA は `index.html?topic=<論点名>` に飛び、その論点で絞り込んだ状態でアプリが開く
+- 問題・テンプレートを変更したら `node build.js` を再実行してからコミットする
+
+## AIに質問（外部AIへのリンク）
+
+答え合わせ後と論点ページの各例題に「ChatGPT / Claude / 質問文をコピー」ボタンがあります。
+問題文・正解の仕訳・解説を載せたプロンプトを URL に含めて外部AIを開くだけなので、API費用はかかりません。
+プロンプトの形式は `script.js` と `build.js` の `buildAiPrompt` で揃えています。
 
 ## 問題データについて
 
@@ -63,9 +89,9 @@ mugen-shiwake/
 }
 ```
 
-## カバー論点（29論点）
+## カバー論点
 
-現金 / 普通預金 / 売掛金 / 買掛金 / 売上 / 仕入 / 前払金 / 前受金 / 未収入金 / 未払金 / 仮払金 / 仮受金 / 立替金 / 預り金 / クレジット売掛金 / 受取手形 / 支払手形 / 備品 / 消耗品費 / 旅費交通費 / 通信費 / 租税公課 / 発送費 / 貸倒引当金繰入 / 貸倒引当金戻入 / 貸倒損失 / 減価償却費 / 損益振替 / 繰越利益剰余金
+55論点。一覧は `topics/index.html`（公開版: https://naotoyc.github.io/mugen-shiwake/topics/ ）を参照。
 
 ## 今後の拡張案
 
