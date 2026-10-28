@@ -35,6 +35,10 @@
 <header>
   <a class="site-title" href="../../">無限仕訳</a>
   <div class="site-subtitle">簿記3級 第1問対策 — 論点別の例題と解説</div>
+  <nav class="site-nav" aria-label="メイン">
+    <a class="site-nav-tab" href="../../?topic=%E6%B6%88%E8%80%97%E5%93%81">練習する</a>
+    <a class="site-nav-tab is-current" aria-current="page" href="../../topics/">論点解説</a>
+  </nav>
 </header>
 <div class="container">
 <nav class="crumbs" aria-label="パンくず"><a href="../../">無限仕訳</a><span class="crumb-sep">›</span><a href="../">論点一覧</a><span class="crumb-sep">›</span><span aria-current="page">消耗品</span></nav>
@@ -169,7 +173,7 @@
       track('ask_ai', { provider: 'copy', topic: b.dataset.topic, source: 'topic_page' });
     });
   });
-  document.querySelectorAll('a.cta').forEach(function (a) {
+  document.querySelectorAll('a.cta, .site-nav-tab[href*="?topic="]').forEach(function (a) {
     a.addEventListener('click', function () { track('topic_page_to_app', { href: a.getAttribute('href') }); });
   });
   document.querySelectorAll('.promo a[data-aff]').forEach(function (a) {

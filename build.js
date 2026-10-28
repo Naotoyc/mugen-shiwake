@@ -196,7 +196,14 @@ function overallDifficulty(examples) {
 }
 
 // ── HTML 部品 ──
-function head({ title, description, canonical, jsonLd, cssPrefix }) {
+function siteNav(cssPrefix, current, appHref) {
+  const cls = k => `class="site-nav-tab${current === k ? ' is-current' : ''}"${current === k ? ' aria-current="page"' : ''}`;
+  return `<nav class="site-nav" aria-label="メイン">
+    <a ${cls('app')} href="${appHref || cssPrefix}">練習する</a>
+    <a ${cls('topics')} href="${cssPrefix}topics/">論点解説</a>
+  </nav>`;
+}
+function head({ title, description, canonical, jsonLd, cssPrefix, current, appHref }) {
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -234,6 +241,7 @@ function head({ title, description, canonical, jsonLd, cssPrefix }) {
 <header>
   <a class="site-title" href="${cssPrefix}">${SITE_NAME}</a>
   <div class="site-subtitle">簿記3級 第1問対策 — 論点別の例題と解説</div>
+  ${siteNav(cssPrefix, current, appHref)}
 </header>
 <div class="container">
 `;
@@ -265,7 +273,7 @@ function foot(cssPrefix) {
       track('ask_ai', { provider: 'copy', topic: b.dataset.topic, source: 'topic_page' });
     });
   });
-  document.querySelectorAll('a.cta').forEach(function (a) {
+  document.querySelectorAll('a.cta, .site-nav-tab[href*="?topic="]').forEach(function (a) {
     a.addEventListener('click', function () { track('topic_page_to_app', { href: a.getAttribute('href') }); });
   });
   document.querySelectorAll('.promo a[data-aff]').forEach(function (a) {
@@ -371,7 +379,7 @@ function topicPage(name) {
       </ul>
     </section>` : '';
 
-  return head({ title, description, canonical: url, jsonLd, cssPrefix: '../../' }) +
+  return head({ title, description, canonical: url, jsonLd, cssPrefix: '../../', current: 'topics', appHref }) +
     breadcrumbs(crumbs) + `
   <section class="intro">
     <h1>${esc(name)}の仕訳<span class="h1-sub">簿記3級 例題${n}問と解説</span></h1>
@@ -422,7 +430,7 @@ function indexPage() {
     names.map(n => `<li><a href="${SLUGS[n]}/">${esc(n)}<span class="topic-count">${topics.get(n).examples.length}問</span></a></li>`).join('')
   }</ul>`;
 
-  return head({ title, description, canonical: url, jsonLd, cssPrefix: '../' }) +
+  return head({ title, description, canonical: url, jsonLd, cssPrefix: '../', current: 'topics' }) +
     breadcrumbs(crumbs) + `
   <section class="intro">
     <h1>簿記3級 仕訳の論点一覧<span class="h1-sub">${topicNames.length}論点・例題${total}問</span></h1>

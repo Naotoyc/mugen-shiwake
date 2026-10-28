@@ -82,6 +82,33 @@ header {
   margin-top: 2px;
 }
 
+/* ── Site nav（練習する / 論点解説）── */
+.site-nav {
+  display: flex;
+  max-width: 320px;
+  margin: 10px auto 0;
+  padding: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.site-nav-tab {
+  flex: 1;
+  padding: 7px 0;
+  font-size: .85rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-sub);
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.site-nav-tab:hover { color: var(--text); }
+.site-nav-tab.is-current {
+  background: var(--accent);
+  color: #fff;
+}
+
 /* ── Intro ── */
 .intro {
   background: var(--card);
