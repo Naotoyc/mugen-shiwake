@@ -241,7 +241,7 @@ function head({ title, description, canonical, jsonLd, cssPrefix }) {
 function foot(cssPrefix) {
   return `
   <footer>
-    <p><a href="${cssPrefix}">${SITE_NAME}</a> ｜ <a href="${cssPrefix}topics/">論点一覧</a></p>
+    <p><a href="${cssPrefix}">${SITE_NAME}</a> ｜ <a href="${cssPrefix}topics/">論点一覧</a> ｜ <a href="${cssPrefix}about.html">運営者情報</a></p>
     <p style="margin-top:4px">問題は学習用に作成したオリジナルです</p>
   </footer>
 </div>

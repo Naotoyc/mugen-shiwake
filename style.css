@@ -545,6 +545,7 @@ footer {
   font-size: .75rem;
   color: var(--text-sub);
 }
+footer a { color: var(--text-sub); }
 
 /* ── Genre filter row ── */
 .filter-row {
