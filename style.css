@@ -573,6 +573,7 @@ footer {
   color: var(--text-sub);
 }
 footer a { color: var(--text-sub); }
+footer .ad-notice { margin-top: 10px; font-size: .72rem; color: var(--text-sub); }
 
 /* ── Genre filter row ── */
 .filter-row {

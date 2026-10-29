@@ -251,6 +251,7 @@ function foot(cssPrefix) {
   <footer>
     <p><a href="${cssPrefix}">${SITE_NAME}</a> ｜ <a href="${cssPrefix}topics/">論点一覧</a> ｜ <a href="${cssPrefix}about.html">運営者情報</a></p>
     <p style="margin-top:4px">問題は学習用に作成したオリジナルです</p>
+    <p class="ad-notice">当サイトはアフィリエイト広告（A8.net・Amazonアソシエイト等）を利用しています</p>
   </footer>
 </div>
 <script>
