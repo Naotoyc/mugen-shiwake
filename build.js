@@ -242,6 +242,7 @@ function head({ title, description, canonical, jsonLd, cssPrefix, current, appHr
   <a class="site-title" href="${cssPrefix}">${SITE_NAME}</a>
   <div class="site-subtitle">簿記3級 第1問対策 — 論点別の例題と解説</div>
   ${siteNav(cssPrefix, current, appHref)}
+  <p class="ad-notice">当サイトにはアフィリエイト広告が含まれます</p>
 </header>
 <div class="container">
 `;
@@ -251,7 +252,6 @@ function foot(cssPrefix) {
   <footer>
     <p><a href="${cssPrefix}">${SITE_NAME}</a> ｜ <a href="${cssPrefix}topics/">論点一覧</a> ｜ <a href="${cssPrefix}about.html">運営者情報</a></p>
     <p style="margin-top:4px">問題は学習用に作成したオリジナルです</p>
-    <p class="ad-notice">当サイトはアフィリエイト広告を利用しています</p>
   </footer>
 </div>
 <script>
