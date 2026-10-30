@@ -18,8 +18,18 @@
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
+    // 内部アクセス除外: 一度 ?internal=1 で開いた端末は以後 traffic_type=internal を送る（?internal=0 で解除）
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search).get('internal');
+        if (q === '1') localStorage.setItem('mugen_internal', '1');
+        if (q === '0') localStorage.removeItem('mugen_internal');
+        window.__mugenInternal = localStorage.getItem('mugen_internal') === '1';
+      } catch (e) { window.__mugenInternal = false; }
+      if (window.__mugenInternal) document.documentElement.setAttribute('data-internal', '1');
+    })();
     gtag('js', new Date());
-    gtag('config', 'G-Y078QDMH2J');
+    gtag('config', 'G-Y078QDMH2J', window.__mugenInternal ? { traffic_type: 'internal' } : {});
   </script>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="topics.css">
