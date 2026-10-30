@@ -727,7 +727,8 @@ function renderPromoCard() {
   }
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   card.innerHTML = `
-    <div class="promo-head promo-head-slim">
+    <div class="promo-head">
+      <h2 class="section-title">${questionCount}問おつかれさま</h2>
       <span class="pr-tag">PR</span>
       <button class="promo-close" type="button" aria-label="このセッションでは表示しない" title="このセッションでは表示しない">×</button>
     </div>

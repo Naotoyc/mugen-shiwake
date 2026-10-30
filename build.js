@@ -267,7 +267,7 @@ function head({ title, description, canonical, jsonLd, cssPrefix, current, appHr
   <a class="site-title" href="${cssPrefix}">${SITE_NAME}</a>
   <div class="site-subtitle">簿記3級 第1問対策 — 論点別の例題と解説</div>
   ${siteNav(cssPrefix, current, appHref)}
-  <p class="ad-notice">当サイトにはアフィリエイト広告が含まれます</p>
+  <p class="site-disclosure">当サイトにはアフィリエイト広告が含まれます</p>
 </header>
 <div class="container">
 `;
@@ -421,8 +421,8 @@ function topicPage(name) {
     ${examplesHtml}
     <a class="btn btn-next cta" href="${appHref}">「${esc(name)}」の問題を無限に解く →</a>
     <p class="cta-note">金額がランダムに変わる同じ論点の問題を、答え合わせ・解説付きで何問でも解けます。無料・登録不要。</p>
-    ${relatedHtml}
     ${affiliateBlock(`「${name}」を紙や講座で固めるなら`, 'topic_page')}
+    ${relatedHtml}
   </main>` + foot('../../');
 }
 
