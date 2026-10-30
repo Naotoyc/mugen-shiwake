@@ -703,9 +703,7 @@ function renderAskAI() {
   renderPromoCard(true);
 }
 
-// ── 教材・講座カード（PR）: 答え合わせ後に毎回、閉じたらそのセッションでは出さない ──
-const PROMO_EVERY = 1;
-const PROMO_DISMISS_KEY = 'mugen_shiwake_promo_dismissed';
+// ── 教材・講座カード（PR）: 問題カードの下に常時表示 ──
 function promoItemHtml(a, place, esc) {
   const attrs = `href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}" data-place="${esc(place)}"`;
   const micro = a.micro ? `<div class="promo-micro">${esc(a.micro)}</div>` : '';
@@ -720,9 +718,7 @@ function renderPromoCard(answered = false) {
   const card = document.getElementById('promo-card');
   if (!card) return;
   const items = (typeof AFFILIATES !== 'undefined' ? AFFILIATES : []).filter(a => a.url);
-  let dismissed = false;
-  try { dismissed = sessionStorage.getItem(PROMO_DISMISS_KEY) === '1'; } catch { /* noop */ }
-  if (items.length === 0 || dismissed || questionCount % PROMO_EVERY !== 0) {
+  if (items.length === 0) {
     card.hidden = true;
     return;
   }
@@ -733,7 +729,6 @@ function renderPromoCard(answered = false) {
     <div class="promo-head${done ? '' : ' promo-head-slim'}">
       ${done ? `<h2 class="section-title">${done}問おつかれさま</h2>` : ''}
       <span class="pr-tag">PR</span>
-      <button class="promo-close" type="button" aria-label="このセッションでは表示しない" title="このセッションでは表示しない">×</button>
     </div>
     <ul class="promo-list">
       ${items.map(a => promoItemHtml(a, 'app', esc)).join('')}
@@ -743,11 +738,6 @@ function renderPromoCard(answered = false) {
     a.addEventListener('click', () => {
       track('affiliate_click', { id: a.dataset.aff, kind: a.dataset.kind, place: 'app', question_count: questionCount });
     });
-  });
-  card.querySelector('.promo-close').addEventListener('click', () => {
-    try { sessionStorage.setItem(PROMO_DISMISS_KEY, '1'); } catch { /* noop */ }
-    card.hidden = true;
-    track('affiliate_dismiss', { question_count: questionCount });
   });
   card.hidden = false;
   track('affiliate_view', { place: 'app', question_count: questionCount });
