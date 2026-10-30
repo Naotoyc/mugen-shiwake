@@ -18,9 +18,10 @@ const AFFILIATES = [
   },
   {
     id: 'course-ohara', kind: 'course',
-    label: '資格の大原 簿記3級講座',
-    lead: '通学・Web両対応。合格実績重視で選ぶなら',
-    url: '',
+    label: '資格の大原（専門課程）',
+    lead: '簿記・会計を学校で本格的に学ぶなら。資料請求はこちら',
+    // アクセストレード。飛び先は専門課程（専門学校）ページ。簿記3級向けの講座プログラムが取れたら差し替える
+    url: 'https://h.accesstrade.net/sp/cc?rk=01002q1c00p1lz',
   },
   {
     id: 'course-crear', kind: 'course',
