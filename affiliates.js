@@ -3,7 +3,7 @@
 // - url が空の項目は表示されない（承認待ちの間は空のままでよい）
 // - 変更したら `node build.js` を再実行する（論点ページに反映。アプリ側は読み込むだけ）
 // - url: ASP の広告リンクの href（必須）
-// - display: 'button' なら micro（ボタン上の一言）＋ cta（ボタン文言）で表示。'banner' なら img を表示。省略時は label/lead のテキスト
+// - display: 'both'=バナー＋ボタン / 'button'=micro（ボタン上の一言）＋cta（ボタン文言） / 'banner'=img のみ / 省略=label/lead のテキスト
 const AFFILIATES = [
   {
     id: 'book-sukkiri', kind: 'book',
@@ -23,8 +23,8 @@ const AFFILIATES = [
     lead: '簿記・会計を学校で本格的に学ぶなら。資料請求はこちら',
     // アクセストレード。飛び先は専門課程（専門学校）ページ。簿記3級向けの講座プログラムが取れたら差し替える
     url: 'https://h.accesstrade.net/sp/cc?rk=01002q1c00p1lz',
-    // display: 'button'（マイクロコピー＋ボタン）/ 'banner'（img を表示）/ 省略でテキスト
-    display: 'button',
+    // display: 'both'（バナー＋マイクロコピー＋ボタン）/ 'button' / 'banner' / 省略でテキスト
+    display: 'both',
     micro: '＼資料請求は無料／',
     cta: '資格の大原（専門課程）を見る →',
     img: 'https://h.accesstrade.net/sp/rr?rk=01002q1c00p1lz', imgWidth: 468, imgHeight: 60,
