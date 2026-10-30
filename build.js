@@ -237,6 +237,10 @@ function head({ title, description, canonical, jsonLd, cssPrefix, current, appHr
   <meta name="twitter:image" content="${OGP_IMAGE}">
   <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#1e293b" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="${cssPrefix}favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="${cssPrefix}favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="${cssPrefix}apple-touch-icon.png">
+  <link rel="manifest" href="${cssPrefix}site.webmanifest">
   <script async src="https://www.googletagmanager.com/gtag/js?id=${GA_ID}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
