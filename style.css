@@ -137,9 +137,15 @@ header {
   -webkit-tap-highlight-color: transparent;
 }
 .intro-fold summary::-webkit-details-marker { display: none; }
-.intro-fold-text { flex: 1; }
-.intro-fold-arrow { font-size: .6rem; color: var(--text-sub); transition: transform .15s; }
+.intro-fold-text { flex: 1; color: var(--text-sub); }
+.intro-fold-arrow { display: inline-block; font-size: .6rem; color: var(--text-sub); transition: transform .15s; }
 .intro-fold[open] .intro-fold-arrow { transform: rotate(180deg); }
+.intro-fold-link {
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
 .intro-fold-body { padding: 0 14px 14px; border-top: 1px solid var(--border); }
 .intro-fold-body p:first-child { margin-top: 12px; }
 
