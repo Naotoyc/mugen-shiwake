@@ -198,12 +198,12 @@
           </div>
         </div>
 
-        <!-- 10問ごとに1回だけ出す教材・講座カード（affiliates.js に url が無ければ出ない） -->
-        <section id="promo-card" class="promo promo-card" hidden aria-label="教材・講座（PR）"></section>
-
         <button class="btn btn-next" id="next-btn" type="button" hidden>
           次の問題 →
         </button>
+
+        <!-- 答え合わせ後に毎回出す教材・講座カード（affiliates.js に url が無ければ出ない。閉じたらそのセッションでは出さない） -->
+        <section id="promo-card" class="promo promo-card" hidden aria-label="教材・講座（PR）"></section>
       </section>
     </article>
   </main>

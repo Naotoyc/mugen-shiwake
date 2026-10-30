@@ -702,8 +702,8 @@ function renderAskAI() {
   renderPromoCard();
 }
 
-// ── 教材・講座カード（PR）: 10問ごとに1回、閉じたらそのセッションでは出さない ──
-const PROMO_EVERY = 10;
+// ── 教材・講座カード（PR）: 答え合わせ後に毎回、閉じたらそのセッションでは出さない ──
+const PROMO_EVERY = 1;
 const PROMO_DISMISS_KEY = 'mugen_shiwake_promo_dismissed';
 function renderPromoCard() {
   const card = document.getElementById('promo-card');
