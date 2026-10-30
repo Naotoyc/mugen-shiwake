@@ -69,7 +69,7 @@ node build.js
 - 論点ページの末尾（`node build.js` の再実行が必要）
 - 論点一覧ページの末尾（同上）
 - アプリ内: 答え合わせのたびに「次の問題」ボタンの下にカード表示（閉じるとそのセッションでは出ない）
-- `img` を設定した項目はテキストではなくバナー画像で表示（ASPの `<img src>` をそのまま。`imgWidth`/`imgHeight` も合わせて）
+- `display: 'button'` でマイクロコピー（`micro`）＋ボタン（`cta`）表示、`display: 'banner'` で `img` のバナー表示、省略でテキスト表示。PR バッジは見出し横に常に付く
 - `node build.js` は CSS/JS の内容ハッシュを `?v=` として index.html / about.html / 論点ページに書き込む（ブラウザキャッシュ対策）。CSS や JS を変えたら必ず再実行
 
 全リンクは `rel="sponsored"`・PR表記つき。クリックは GA4 の `affiliate_click`（id / kind / place）で計測。

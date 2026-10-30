@@ -577,21 +577,39 @@ td.credit-amount  { text-align: right; padding-right: 12px; }
   color: var(--text-sub);
   margin-top: 2px;
 }
-.promo-note {
-  font-size: .72rem;
-  color: var(--text-sub);
-  margin: 8px 0 0;
-}
 .promo-close {
-  margin-top: 8px;
+  margin-left: 2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
   background: none;
-  border: none;
+  border: 1px solid var(--border);
   color: var(--text-sub);
-  font-size: .78rem;
-  text-decoration: underline;
+  font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
   font-family: inherit;
-  padding: 4px 0;
+  padding: 0;
+  flex-shrink: 0;
+}
+/* マイクロコピー＋ボタン */
+.promo-btn-wrap { text-align: center; }
+.promo-micro {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.promo-list a.promo-btn {
+  display: block;
+  padding: 13px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: .95rem;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, .25);
 }
 
 footer {

@@ -151,15 +151,20 @@ function affiliateBlock(heading, place) {
         <span class="pr-tag">PR</span>
       </div>
       <ul class="promo-list">
-        ${items.map(a => a.img
-          ? `<li class="promo-banner"><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${a.id}" data-kind="${a.kind}" data-place="${place}"><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>`
-          : `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${a.id}" data-kind="${a.kind}" data-place="${place}">
-          <span class="promo-label">${esc(a.label)}</span>
-          <span class="promo-lead">${esc(a.lead)}</span>
-        </a></li>`).join('\n        ')}
+        ${items.map(a => promoItemHtml(a, place, esc)).join('\n        ')}
       </ul>
-      <p class="promo-note">※アフィリエイトリンクを含みます。購入・申込があった場合、当サイトに報酬が入ることがあります。</p>
     </section>`;
+}
+
+function promoItemHtml(a, place, esc) {
+  const attrs = `href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}" data-place="${esc(place)}"`;
+  if (a.display === 'button') {
+    return `<li class="promo-btn-wrap">${a.micro ? `<div class="promo-micro">${esc(a.micro)}</div>` : ''}<a class="promo-btn" ${attrs}>${esc(a.cta || a.label)}</a></li>`;
+  }
+  if (a.display === 'banner' && a.img) {
+    return `<li class="promo-banner"><a ${attrs}><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>`;
+  }
+  return `<li><a ${attrs}><span class="promo-label">${esc(a.label)}</span><span class="promo-lead">${esc(a.lead || '')}</span></a></li>`;
 }
 
 function askAiBlock(q, topic) {

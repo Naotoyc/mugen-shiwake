@@ -705,6 +705,16 @@ function renderAskAI() {
 // ── 教材・講座カード（PR）: 答え合わせ後に毎回、閉じたらそのセッションでは出さない ──
 const PROMO_EVERY = 1;
 const PROMO_DISMISS_KEY = 'mugen_shiwake_promo_dismissed';
+function promoItemHtml(a, place, esc) {
+  const attrs = `href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}" data-place="${esc(place)}"`;
+  if (a.display === 'button') {
+    return `<li class="promo-btn-wrap">${a.micro ? `<div class="promo-micro">${esc(a.micro)}</div>` : ''}<a class="promo-btn" ${attrs}>${esc(a.cta || a.label)}</a></li>`;
+  }
+  if (a.display === 'banner' && a.img) {
+    return `<li class="promo-banner"><a ${attrs}><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>`;
+  }
+  return `<li><a ${attrs}><span class="promo-label">${esc(a.label)}</span><span class="promo-lead">${esc(a.lead || '')}</span></a></li>`;
+}
 function renderPromoCard() {
   const card = document.getElementById('promo-card');
   if (!card) return;
@@ -720,17 +730,11 @@ function renderPromoCard() {
     <div class="promo-head">
       <h2 class="section-title">${questionCount}問おつかれさま。紙や講座で固めるなら</h2>
       <span class="pr-tag">PR</span>
+      <button class="promo-close" type="button" aria-label="このセッションでは表示しない" title="このセッションでは表示しない">×</button>
     </div>
     <ul class="promo-list">
-      ${items.map(a => a.img
-        ? `<li class="promo-banner"><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}"><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>`
-        : `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}">
-        <span class="promo-label">${esc(a.label)}</span>
-        <span class="promo-lead">${esc(a.lead)}</span>
-      </a></li>`).join('')}
+      ${items.map(a => promoItemHtml(a, 'app', esc)).join('')}
     </ul>
-    <p class="promo-note">※アフィリエイトリンクを含みます。</p>
-    <button class="promo-close" type="button">このセッションでは表示しない</button>
   `;
   card.querySelectorAll('a[data-aff]').forEach(a => {
     a.addEventListener('click', () => {
