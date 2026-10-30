@@ -722,7 +722,9 @@ function renderPromoCard() {
       <span class="pr-tag">PR</span>
     </div>
     <ul class="promo-list">
-      ${items.map(a => `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}">
+      ${items.map(a => a.img
+        ? `<li class="promo-banner"><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}"><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>`
+        : `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}">
         <span class="promo-label">${esc(a.label)}</span>
         <span class="promo-lead">${esc(a.lead)}</span>
       </a></li>`).join('')}

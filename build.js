@@ -9,6 +9,11 @@ const path = require('path');
 const { QUESTION_TEMPLATES } = require('./questions.js');
 const { AFFILIATES } = require('./affiliates.js');
 
+const crypto = require('crypto');
+// キャッシュ対策: アセット内容のハッシュを ?v= に付ける（index.html / about.html にも書き戻す）
+const ASSET_V = crypto.createHash('sha1').update(Buffer.concat(
+  ['style.css', 'topics.css', 'script.js', 'affiliates.js', 'questions.js'].map(f => fs.readFileSync(path.join(__dirname, f)))
+)).digest('hex').slice(0, 8);
 const SITE_URL   = 'https://naotoyc.github.io/mugen-shiwake/';
 const SITE_NAME  = '無限仕訳';
 const GA_ID      = 'G-Y078QDMH2J';
@@ -146,7 +151,9 @@ function affiliateBlock(heading, place) {
         <span class="pr-tag">PR</span>
       </div>
       <ul class="promo-list">
-        ${items.map(a => `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${a.id}" data-kind="${a.kind}" data-place="${place}">
+        ${items.map(a => a.img
+          ? `<li class="promo-banner"><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${a.id}" data-kind="${a.kind}" data-place="${place}"><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>`
+          : `<li><a href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${a.id}" data-kind="${a.kind}" data-place="${place}">
           <span class="promo-label">${esc(a.label)}</span>
           <span class="promo-lead">${esc(a.lead)}</span>
         </a></li>`).join('\n        ')}
@@ -242,8 +249,8 @@ function head({ title, description, canonical, jsonLd, cssPrefix, current, appHr
     gtag('js', new Date());
     gtag('config', '${GA_ID}', window.__mugenInternal ? { traffic_type: 'internal' } : {});
   </script>
-  <link rel="stylesheet" href="${cssPrefix}style.css">
-  <link rel="stylesheet" href="${cssPrefix}topics.css">
+  <link rel="stylesheet" href="${cssPrefix}style.css?v=${ASSET_V}">
+  <link rel="stylesheet" href="${cssPrefix}topics.css?v=${ASSET_V}">
   <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </head>
 <body>
@@ -478,4 +485,11 @@ fs.writeFileSync(path.join(__dirname, 'sitemap.xml'),
 fs.writeFileSync(path.join(__dirname, 'robots.txt'),
   `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`);
 
+// index.html / about.html のアセット参照に ?v= を付け直す
+for (const f of ['index.html', 'about.html']) {
+  const fp = path.join(__dirname, f);
+  const before = fs.readFileSync(fp, 'utf8');
+  const after = before.replace(/((?:href|src)=")((?:style|topics)\.css|(?:script|affiliates|questions)\.js)(?:\?v=[^"]*)?"/g, `$1$2?v=${ASSET_V}"`);
+  if (after !== before) fs.writeFileSync(fp, after);
+}
 console.log(`topics: ${topicNames.length} pages, examples: ${QUESTION_TEMPLATES.length}, sitemap: ${urls.length} urls`);
