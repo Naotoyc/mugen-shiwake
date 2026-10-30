@@ -50,7 +50,7 @@
     gtag('js', new Date());
     gtag('config', 'G-Y078QDMH2J', window.__mugenInternal ? { traffic_type: 'internal' } : {});
   </script>
-  <link rel="stylesheet" href="style.css?v=e09faf15">
+  <link rel="stylesheet" href="style.css?v=ae671578">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -211,10 +211,11 @@
           次の問題 →
         </button>
 
-        <!-- 答え合わせ後に毎回出す教材・講座カード（affiliates.js に url が無ければ出ない。閉じたらそのセッションでは出さない） -->
-        <section id="promo-card" class="promo promo-card" hidden aria-label="教材・講座（PR）"></section>
       </section>
     </article>
+
+    <!-- 教材・講座カード（PR）: 問題表示中も常に出す。affiliates.js に url が無ければ出ない。× で閉じたらそのセッションでは出さない -->
+    <section id="promo-card" class="promo promo-card" hidden aria-label="教材・講座（PR）"></section>
   </main>
 
   <footer>
@@ -244,8 +245,8 @@
 <!-- トースト -->
 <div id="toast" class="toast" aria-live="polite"></div>
 
-<script src="questions.js?v=e09faf15" defer></script>
-<script src="affiliates.js?v=e09faf15" defer></script>
-<script src="script.js?v=e09faf15" defer></script>
+<script src="questions.js?v=ae671578" defer></script>
+<script src="affiliates.js?v=ae671578" defer></script>
+<script src="script.js?v=ae671578" defer></script>
 </body>
 </html>

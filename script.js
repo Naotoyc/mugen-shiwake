@@ -506,6 +506,7 @@ function loadQuestion(templateId = null) {
 
   questionCount++;
   document.getElementById('question-count').textContent = `${questionCount}問目`;
+  renderPromoCard();
 
   resetInputRows();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -699,7 +700,7 @@ function renderAskAI() {
   document.getElementById('ask-chatgpt').href = AI_LINKS.chatgpt + enc;
   document.getElementById('ask-claude').href  = AI_LINKS.claude  + enc;
   box.hidden = false;
-  renderPromoCard();
+  renderPromoCard(true);
 }
 
 // ── 教材・講座カード（PR）: 答え合わせ後に毎回、閉じたらそのセッションでは出さない ──
@@ -715,7 +716,7 @@ function promoItemHtml(a, place, esc) {
   if (a.display === 'banner' && banner) return banner;
   return `<li><a ${attrs}><span class="promo-label">${esc(a.label)}</span><span class="promo-lead">${esc(a.lead || '')}</span></a></li>`;
 }
-function renderPromoCard() {
+function renderPromoCard(answered = false) {
   const card = document.getElementById('promo-card');
   if (!card) return;
   const items = (typeof AFFILIATES !== 'undefined' ? AFFILIATES : []).filter(a => a.url);
@@ -726,9 +727,11 @@ function renderPromoCard() {
     return;
   }
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // 解き終えた問数: 答え合わせ前は現在の問題を含めない
+  const done = Math.max(0, questionCount - (answered ? 0 : 1));
   card.innerHTML = `
-    <div class="promo-head">
-      <h2 class="section-title">${questionCount}問おつかれさま</h2>
+    <div class="promo-head${done ? '' : ' promo-head-slim'}">
+      ${done ? `<h2 class="section-title">${done}問おつかれさま</h2>` : ''}
       <span class="pr-tag">PR</span>
       <button class="promo-close" type="button" aria-label="このセッションでは表示しない" title="このセッションでは表示しない">×</button>
     </div>
