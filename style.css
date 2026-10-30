@@ -123,6 +123,26 @@ header {
 
 .intro p + p { margin-top: 8px; }
 
+/* 折りたたみ版（アプリのトップ）: 閉じていれば1行 */
+.intro-fold { padding: 0; margin-top: 10px; }
+.intro-fold summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  font-size: .8rem;
+  line-height: 1.4;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.intro-fold summary::-webkit-details-marker { display: none; }
+.intro-fold-text { flex: 1; }
+.intro-fold-arrow { font-size: .6rem; color: var(--text-sub); transition: transform .15s; }
+.intro-fold[open] .intro-fold-arrow { transform: rotate(180deg); }
+.intro-fold-body { padding: 0 14px 14px; border-top: 1px solid var(--border); }
+.intro-fold-body p:first-child { margin-top: 12px; }
+
 .intro strong {
   color: var(--text);
   font-weight: 600;
