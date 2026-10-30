@@ -564,6 +564,9 @@ td.credit-amount  { text-align: right; padding-right: 12px; }
 }
 .promo-list a:active { transform: scale(.98); }
 .promo-list .promo-banner a { padding: 8px; }
+.promo-banner .promo-micro { margin-bottom: 6px; text-align: center; }
+.promo-head-slim { justify-content: flex-end; }
+.promo-head-slim + .promo-list { margin-top: 6px; }
 .promo-banner img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
 .promo-label {
   display: block;

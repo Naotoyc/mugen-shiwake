@@ -24,7 +24,7 @@ const AFFILIATES = [
     // アクセストレード。飛び先は専門課程（専門学校）ページ。簿記3級向けの講座プログラムが取れたら差し替える
     url: 'https://h.accesstrade.net/sp/cc?rk=01002q1c00p1lz',
     // display: 'both'（バナー＋マイクロコピー＋ボタン）/ 'button' / 'banner' / 省略でテキスト
-    display: 'both',
+    display: 'banner',
     micro: '＼資料請求は無料／',
     cta: '資格の大原（専門課程）を見る →',
     img: 'https://h.accesstrade.net/sp/rr?rk=01002q1c00p1lz', imgWidth: 468, imgHeight: 60,

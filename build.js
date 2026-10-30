@@ -146,8 +146,7 @@ function affiliateBlock(heading, place) {
   if (items.length === 0) return '';
   return `
     <section class="promo" aria-label="教材・講座（PR）">
-      <div class="promo-head">
-        <h2 class="section-title">${esc(heading)}</h2>
+      <div class="promo-head promo-head-slim">
         <span class="pr-tag">PR</span>
       </div>
       <ul class="promo-list">
@@ -158,8 +157,9 @@ function affiliateBlock(heading, place) {
 
 function promoItemHtml(a, place, esc) {
   const attrs = `href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}" data-place="${esc(place)}"`;
-  const banner = a.img ? `<li class="promo-banner"><a ${attrs}><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>` : '';
-  const button = `<li class="promo-btn-wrap">${a.micro ? `<div class="promo-micro">${esc(a.micro)}</div>` : ''}<a class="promo-btn" ${attrs}>${esc(a.cta || a.label)}</a></li>`;
+  const micro = a.micro ? `<div class="promo-micro">${esc(a.micro)}</div>` : '';
+  const banner = a.img ? `<li class="promo-banner">${a.display === 'banner' ? micro : ''}<a ${attrs}><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>` : '';
+  const button = `<li class="promo-btn-wrap">${micro}<a class="promo-btn" ${attrs}>${esc(a.cta || a.label)}</a></li>`;
   if (a.display === 'both') return banner + button;
   if (a.display === 'button') return button;
   if (a.display === 'banner' && banner) return banner;
