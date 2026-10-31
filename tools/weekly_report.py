@@ -181,7 +181,9 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) 
         for r in gsc_cur["pages"]:
             L.append(f"| {short_page(r['key'])} | {r['impressions']} | {r['clicks']} | {r['position']:.1f} |")
         L.append("")
-    if not gsc_cur["queries"] and not gsc_cur["pages"]:
+    if gsc_cur.get("error"):
+        L.append("GSC: 取得失敗（サービスアカウントの権限を確認）。上の GSC 行は 0 扱い")
+    elif not gsc_cur["queries"] and not gsc_cur["pages"]:
         L.append("GSC 上位クエリ／ページ: データなし（表示回数0）")
         L.append("")
     return "\n".join(L)
@@ -208,12 +210,21 @@ def render_slack(today: date, ga_cur, ga_prev, gsc_cur, gsc_prev) -> str:
 
 
 # ---------------------------------------------------------------- 出力
-def append_block(path: Path, block: str, heading: str) -> bool:
+def append_block(path: Path, block: str, heading: str, replace: bool = False) -> bool:
+    """見出し行（行全体が一致）で判定する。本文中に同じ文字列が引用されていても誤判定しない。"""
+    import re
     text = path.read_text(encoding="utf-8") if path.exists() else ""
-    if heading in text:
-        print(f"skip: {heading} は既に {path.name} にある")
-        return False
-    if SECTION_HEADING not in text:
+    if re.search(rf"^{re.escape(heading)}\s*$", text, re.M):
+        if not replace:
+            print(f"skip: {heading} は既に {path.name} にある（--replace で上書き）")
+            return False
+        # 同日ブロック（見出しから次の見出し or 末尾まで）を差し替える
+        text = re.sub(rf"^{re.escape(heading)}\s*$.*?(?=^#{{2,3}} |\Z)", block.rstrip("\n") + "\n\n",
+                      text, count=1, flags=re.M | re.S).rstrip("\n") + "\n"
+        path.write_text(text, encoding="utf-8")
+        print(f"replace: {heading} を差し替えた")
+        return True
+    if not re.search(rf"^{re.escape(SECTION_HEADING)}\s*$", text, re.M):
         text = text.rstrip("\n") + f"\n\n{SECTION_HEADING}\n\n週1（月曜朝）自動追記。生成元: mugen-shiwake/tools/weekly_report.py\n"
     text = text.rstrip("\n") + "\n\n" + block.rstrip("\n") + "\n"
     path.write_text(text, encoding="utf-8")
@@ -238,6 +249,7 @@ def main() -> int:
     ap.add_argument("--out", help="Markdown をこのファイルにも書く")
     ap.add_argument("--slack", action="store_true", help="SLACK_WEBHOOK_URL に要約を送る")
     ap.add_argument("--date", help="集計基準日 YYYY-MM-DD（省略時は今日）")
+    ap.add_argument("--replace", action="store_true", help="同日のブロックが既にあれば差し替える（権限追加後の再実行用）")
     args = ap.parse_args()
 
     if args.env_file:
@@ -259,15 +271,20 @@ def main() -> int:
 
     ga_cur = ga4_fetch(property_id, sa_path, *ga_rng[0])
     ga_prev = ga4_fetch(property_id, sa_path, *ga_rng[1])
-    gsc_cur = gsc_fetch(site_url, sa_path, *gsc_rng[0], top=True)
-    gsc_prev = gsc_fetch(site_url, sa_path, *gsc_rng[1], top=False)
+    try:
+        gsc_cur = gsc_fetch(site_url, sa_path, *gsc_rng[0], top=True)
+        gsc_prev = gsc_fetch(site_url, sa_path, *gsc_rng[1], top=False)
+    except Exception as e:  # 権限不足などでも GA4 分は残す
+        print(f"GSC 取得失敗（GA4 のみで出力）: {str(e)[:160]}", file=sys.stderr)
+        empty = {"impressions": 0, "clicks": 0, "queries": [], "pages": []}
+        gsc_cur, gsc_prev = dict(empty, error=True), dict(empty)
 
     md = render_md(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev)
     print(md)
     if args.out:
         Path(args.out).write_text(md + "\n", encoding="utf-8")
     if args.append:
-        append_block(Path(args.append), md, f"### {today.isoformat()}")
+        append_block(Path(args.append), md, f"### {today.isoformat()}", replace=args.replace)
     if args.slack:
         post_slack(render_slack(today, ga_cur, ga_prev, gsc_cur, gsc_prev))
     return 0

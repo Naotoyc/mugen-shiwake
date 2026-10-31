@@ -7,4 +7,4 @@ OS_DIR="$HOME/command-center/toishi-revenue-os"
 exec "$OS_DIR/.venv/bin/python3" tools/weekly_report.py \
   --env-file "$OS_DIR/.env" \
   --append "$HOME/my-Superbrain/projects/無限仕訳/progress.md" \
-  --slack
+  --slack "$@"
