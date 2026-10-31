@@ -1,6 +1,7 @@
 name: daily-report
 
-# 無限仕訳 レポート（GA4 / GSC 直近7日・前週比）を毎朝 Slack に送る。
+# 無限仕訳 レポート（GA4 / GSC 直近7日・前週比）を毎朝 Slack に送り、
+# ダッシュボード用の reports/history.json を更新してコミットする。
 # 毎日 06:30 JST = 21:30 UTC。手動実行も可。
 # 必要な Secrets:
 #   GOOGLE_SERVICE_ACCOUNT_JSON  サービスアカウント JSON の中身（toishi-revenue-os と共用）
@@ -13,7 +14,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: daily-report
+  cancel-in-progress: false
 
 jobs:
   report:
@@ -30,12 +35,22 @@ jobs:
         env:
           SA_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
       - name: Run report
-        run: python tools/weekly_report.py --slack --out "$RUNNER_TEMP/report.md"
+        run: python tools/weekly_report.py --slack --history reports/history.json --out "$RUNNER_TEMP/report.md"
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ runner.temp }}/sa.json
           MUGEN_GA4_PROPERTY_ID: ${{ secrets.MUGEN_GA4_PROPERTY_ID }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          DASHBOARD_URL: https://naotoyc.github.io/mugen-shiwake/reports/
           TZ: Asia/Tokyo
+      - name: Commit history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/history.json
+          git diff --cached --quiet && echo "変更なし" && exit 0
+          git commit -m "reports: $(date +%F) のスナップショットを追加 [skip ci]"
+          git pull --rebase origin main
+          git push
       - uses: actions/upload-artifact@v4
         with:
           name: daily-report

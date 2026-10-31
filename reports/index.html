@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>無限仕訳 ダッシュボード</title>
+<style>
+:root{--bg:#f0f4f8;--card:#fff;--text:#1e293b;--text-sub:#64748b;--border:#e2e8f0;--accent:#2563eb;--up:#15803d;--up-bg:#f0fdf4;--down:#b91c1c;--down-bg:#fef2f2;--grid:#e2e8f0;--radius:14px;--shadow:0 2px 12px rgba(0,0,0,.08)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--text-sub:#94a3b8;--border:#334155;--accent:#60a5fa;--up:#4ade80;--up-bg:#0d1f14;--down:#f87171;--down-bg:#1c1010;--grid:#334155;--shadow:0 2px 16px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 48px}
+header h1{font-size:20px;margin:0 0 4px}
+header .sub{color:var(--text-sub);font-size:13px;margin:0}
+h2{font-size:15px;color:var(--text-sub);font-weight:600;margin:28px 0 10px;letter-spacing:.02em}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media (min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 14px 10px;min-width:0}
+.tile .label{font-size:12px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .val{font-size:28px;font-weight:700;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums}
+.tile .delta{display:inline-block;margin-top:4px;font-size:12px;padding:1px 7px;border-radius:999px;background:var(--border);color:var(--text-sub);font-variant-numeric:tabular-nums}
+.delta.up{background:var(--up-bg);color:var(--up)}.delta.down{background:var(--down-bg);color:var(--down)}
+.tile .prev{font-size:11px;color:var(--text-sub);margin-left:6px}
+.spark{display:block;width:100%;height:36px;margin-top:8px;overflow:visible}
+.spark path{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.spark .area{fill:var(--accent);opacity:.08;stroke:none}
+.spark circle{fill:var(--card);stroke:var(--accent);stroke-width:2}
+.spark .hit{fill:transparent;stroke:none}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px 14px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--text-sub);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td a{color:var(--accent);text-decoration:none;word-break:break-all}
+.empty{color:var(--text-sub);padding:14px 0}
+.tip{position:fixed;pointer-events:none;background:var(--text);color:var(--bg);font-size:12px;padding:4px 8px;border-radius:6px;transform:translate(-50%,-130%);display:none;white-space:nowrap;z-index:9}
+footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(--accent)}
+.note{font-size:12px;color:var(--text-sub);margin:6px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>無限仕訳 ダッシュボード</h1>
+  <p class="sub" id="sub">読み込み中…</p>
+</header>
+
+<h2>アクセス（直近7日・前週比）</h2>
+<div class="grid" id="kpi-access"></div>
+
+<h2>教材カード・導線</h2>
+<div class="grid" id="kpi-aff"></div>
+
+<h2>Google 検索（Search Console）</h2>
+<div class="grid" id="kpi-gsc"></div>
+<p class="note" id="gsc-note"></p>
+
+<h2>検索クエリ 上位（表示回数順）</h2>
+<div class="card"><table id="tbl-q"></table></div>
+
+<h2>検索ページ 上位（表示回数順）</h2>
+<div class="card"><table id="tbl-p"></table></div>
+
+<footer>
+  毎朝 06:30 に GitHub Actions が更新。各タイルの折れ線は「その日時点の直近7日値」の推移（<span id="ndays">-</span>日分）。
+  内部アクセスは <code>traffic_type=internal</code> を除外。Search Console は反映が遅いため3日前までで集計。
+  <br><a href="https://github.com/Naotoyc/mugen-shiwake/actions/workflows/daily-report.yml">Actions の実行ログ</a> ／ <a href="../">アプリへ</a>
+</footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+(async function(){
+  const SITE = 'https://naotoyc.github.io/mugen-shiwake/';
+  const $ = id => document.getElementById(id);
+  let hist;
+  try {
+    const r = await fetch('history.json?t=' + Date.now(), {cache:'no-store'});
+    hist = await r.json();
+  } catch (e) {
+    $('sub').textContent = 'history.json を読めませんでした（' + e.message + '）';
+    return;
+  }
+  if (!hist.length) { $('sub').textContent = 'データがまだありません'; return; }
+  const last = hist[hist.length - 1];
+  const fmtD = s => { const [y,m,d] = s.split('-'); return `${+m}/${+d}`; };
+  $('sub').textContent = `更新 ${last.date}（GA4 ${fmtD(last.ga_range[0])}〜${fmtD(last.ga_range[1])} ／ 検索 ${fmtD(last.gsc_range[0])}〜${fmtD(last.gsc_range[1])}、前週は各7日前）`;
+  $('ndays').textContent = hist.length;
+
+  const fmtN = (v, pct) => pct ? v.toFixed(1) + '%' : v.toLocaleString('ja-JP');
+  const delta = (c, p, pct) => {
+    if (pct) { const d = c - p; return {txt: (d >= 0 ? '+' : '') + d.toFixed(1) + 'pt', cls: d > 0 ? 'up' : d < 0 ? 'down' : ''}; }
+    if (p === 0) return {txt: c === 0 ? '—' : 'new', cls: c > 0 ? 'up' : ''};
+    const d = (c - p) / p * 100; return {txt: (d >= 0 ? '+' : '') + d.toFixed(0) + '%', cls: d > 0 ? 'up' : d < 0 ? 'down' : ''};
+  };
+  const ratio = (a, b) => b ? a / b * 100 : 0;
+  const get = (h, k) => k === 'cvr' ? ratio(h.cur.affiliate_click, h.cur.affiliate_view) : h.cur[k];
+  const getPrev = (h, k) => k === 'cvr' ? ratio(h.prev.affiliate_click, h.prev.affiliate_view) : h.prev[k];
+
+  function spark(key, pct) {
+    const W = 200, H = 36, pad = 4;
+    const vals = hist.map(h => get(h, key));
+    const max = Math.max(...vals, 1), min = Math.min(...vals, 0);
+    const x = i => hist.length === 1 ? W / 2 : pad + i * (W - 2 * pad) / (hist.length - 1);
+    const y = v => H - pad - (v - min) / (max - min || 1) * (H - 2 * pad);
+    const pts = vals.map((v, i) => [x(i), y(v)]);
+    const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    const area = hist.length > 1 ? `${line} L${pts[pts.length-1][0].toFixed(1)} ${H} L${pts[0][0].toFixed(1)} ${H} Z` : '';
+    const dots = pts.map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i === pts.length - 1 ? 4 : 2.5}"></circle>` +
+      `<circle class="hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="10" data-tip="${hist[i].date}: ${fmtN(vals[i], pct)}"></circle>`).join('');
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="${key} の推移">${area ? `<path class="area" d="${area}"></path>` : ''}${hist.length > 1 ? `<path d="${line}"></path>` : ''}${dots}</svg>`;
+  }
+
+  function tile(label, key, pct) {
+    const c = get(last, key), p = getPrev(last, key), d = delta(c, p, pct);
+    return `<div class="tile"><div class="label">${label}</div><div class="val">${fmtN(c, pct)}</div>` +
+      `<span class="delta ${d.cls}">${d.txt}</span><span class="prev">前週 ${fmtN(p, pct)}</span>${spark(key, pct)}</div>`;
+  }
+
+  $('kpi-access').innerHTML =
+    tile('セッション（内部除外）', 'sessions_ext') + tile('PV（内部除外）', 'pv_ext') +
+    tile('セッション（全体）', 'sessions') + tile('PV（全体）', 'pv');
+  $('kpi-aff').innerHTML =
+    tile('教材カード 表示', 'affiliate_view') + tile('教材カード クリック', 'affiliate_click') +
+    tile('クリック率', 'cvr', true) + tile('論点ページ→アプリ', 'topic_page_to_app');
+  $('kpi-gsc').innerHTML =
+    tile('検索 表示回数', 'gsc_impressions') + tile('検索 クリック', 'gsc_clicks');
+  if (last.gsc_error) $('gsc-note').textContent = '最新日の Search Console 取得に失敗しています（権限を確認）。';
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function table(id, rows, head, keyCell) {
+    if (!rows || !rows.length) { $(id).innerHTML = `<tr><td class="empty">まだデータがありません（検索に出始めると並びます）</td></tr>`; return; }
+    $(id).innerHTML = `<tr><th>${head}</th><th class="n">表示</th><th class="n">クリック</th><th class="n">順位</th></tr>` +
+      rows.map(r => `<tr><td>${keyCell(r.key)}</td><td class="n">${r.impressions}</td><td class="n">${r.clicks}</td><td class="n">${r.position.toFixed(1)}</td></tr>`).join('');
+  }
+  table('tbl-q', last.queries, 'クエリ', k => esc(k));
+  table('tbl-p', last.pages, 'ページ', k => `<a href="${esc(k)}" target="_blank" rel="noopener">${esc(k.replace(SITE, '/'))}</a>`);
+
+  // ツールチップ
+  const tip = $('tip');
+  document.addEventListener('pointerover', e => {
+    const t = e.target.closest && e.target.closest('.hit');
+    if (!t) { tip.style.display = 'none'; return; }
+    tip.textContent = t.dataset.tip; tip.style.display = 'block';
+    const b = t.getBoundingClientRect(); tip.style.left = (b.left + b.width / 2) + 'px'; tip.style.top = b.top + 'px';
+  });
+})();
+</script>
+</body>
+</html>

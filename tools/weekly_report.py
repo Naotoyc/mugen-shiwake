@@ -11,6 +11,7 @@
   MUGEN_GA4_PROPERTY_ID         無限仕訳の GA4 プロパティID（数字。測定ID G-... ではない）
   MUGEN_GSC_SITE_URL            省略時 https://naotoyc.github.io/mugen-shiwake/
   SLACK_WEBHOOK_URL             --slack 時に使う（10KChoices 日次レポートと同じ Webhook）
+  DASHBOARD_URL                 Slack のボタンのリンク先（--dashboard-url でも可）
 
 出力: 1週1ブロック（### 日付見出し＋表）。--append 先に「## 週次レポート」節が無ければ末尾に作る。
 同じ見出しが既にあれば追記しない（再実行しても二重にならない）。
@@ -189,24 +190,43 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) 
     return "\n".join(L)
 
 
-def render_slack(today: date, ga_cur, ga_prev, gsc_cur, gsc_prev) -> str:
+def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashboard_url: str = "") -> dict:
+    """Slack Incoming Webhook 用 payload（blocks）。数字は「今週 → 前週比」で揃える。"""
+    (gs, ge), _ = ga_rng
     ev_c, ev_p = ga_cur["events"], ga_prev["events"]
     cv_c = ratio(ev_c["affiliate_click"], ev_c["affiliate_view"])
     cv_p = ratio(ev_p["affiliate_click"], ev_p["affiliate_view"])
-    lines = [
-        f"*無限仕訳 {today:%Y/%m/%d}*（直近7日 / 前週比）",
-        f"• セッション {ga_cur['ext']['sessions']:,}（内部除外） {delta(ga_cur['ext']['sessions'], ga_prev['ext']['sessions'])}"
-        f" ／ PV {ga_cur['ext']['pv']:,} {delta(ga_cur['ext']['pv'], ga_prev['ext']['pv'])}",
-        f"• 教材カード view {ev_c['affiliate_view']} → click {ev_c['affiliate_click']}"
-        f"（{cv_c:.1f}%、{delta(cv_c, cv_p, pct=True)}）",
-        f"• 論点→アプリ {ev_c['topic_page_to_app']} {delta(ev_c['topic_page_to_app'], ev_p['topic_page_to_app'])}",
-        f"• GSC 表示 {gsc_cur['impressions']:,} {delta(gsc_cur['impressions'], gsc_prev['impressions'])}"
-        f" ／ クリック {gsc_cur['clicks']:,} {delta(gsc_cur['clicks'], gsc_prev['clicks'])}",
+
+    def kpi(label, cur, prev, pct=False):
+        val = f"{cur:.1f}%" if pct else f"{cur:,}"
+        return f"*{label}*\n{val}  ({delta(cur, prev, pct)})"
+
+    fields = [
+        kpi("セッション（内部除外）", ga_cur["ext"]["sessions"], ga_prev["ext"]["sessions"]),
+        kpi("PV（内部除外）", ga_cur["ext"]["pv"], ga_prev["ext"]["pv"]),
+        kpi("教材カード 表示", ev_c["affiliate_view"], ev_p["affiliate_view"]),
+        kpi("教材カード クリック", ev_c["affiliate_click"], ev_p["affiliate_click"]),
+        kpi("クリック率", cv_c, cv_p, pct=True),
+        kpi("論点ページ→アプリ", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"]),
+        kpi("Google 検索 表示", gsc_cur["impressions"], gsc_prev["impressions"]),
+        kpi("Google 検索 クリック", gsc_cur["clicks"], gsc_prev["clicks"]),
+    ]
+    title = f"無限仕訳 {today:%-m/%-d}（{gs:%-m/%-d}〜{ge:%-m/%-d} の7日間・前週比）"
+    blocks = [
+        {"type": "header", "text": {"type": "plain_text", "text": title}},
+        {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[:4]]},
+        {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[4:]]},
     ]
     if gsc_cur["queries"]:
-        lines.append("• 上位クエリ: " + " / ".join(f"{r['key']}({r['impressions']})" for r in gsc_cur["queries"][:3]))
-    lines.append("表の詳細: vault progress.md「週次レポート」（Mac起動時に追記）／GitHub Actions の Artifact")
-    return "\n".join(lines)
+        top = " ／ ".join(f"{r['key']}（{r['impressions']}）" for r in gsc_cur["queries"][:3])
+        blocks.append({"type": "context", "elements": [{"type": "mrkdwn", "text": f"検索クエリ 上位: {top}"}]})
+    if dashboard_url:
+        blocks.append({"type": "actions", "elements": [{
+            "type": "button", "text": {"type": "plain_text", "text": "ダッシュボードを開く"},
+            "url": dashboard_url, "style": "primary"}]})
+    text = (f"{title}: セッション {ga_cur['ext']['sessions']} / PV {ga_cur['ext']['pv']} / "
+            f"教材カード {ev_c['affiliate_view']}→{ev_c['affiliate_click']} / 検索表示 {gsc_cur['impressions']}")
+    return {"text": text, "blocks": blocks}
 
 
 # ---------------------------------------------------------------- 出力
@@ -231,13 +251,42 @@ def append_block(path: Path, block: str, heading: str, replace: bool = False) ->
     return True
 
 
-def post_slack(text: str) -> None:
+def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) -> dict:
+    """ダッシュボード用の1日分スナップショット（直近7日と前週の値）。"""
+    def flat(ga, gsc):
+        return {
+            "sessions": ga["total"]["sessions"], "sessions_ext": ga["ext"]["sessions"],
+            "pv": ga["total"]["pv"], "pv_ext": ga["ext"]["pv"],
+            **{e: ga["events"][e] for e in EVENTS},
+            "gsc_impressions": gsc["impressions"], "gsc_clicks": gsc["clicks"],
+        }
+    return {
+        "date": today.isoformat(),
+        "ga_range": [d.isoformat() for d in ga_rng[0]],
+        "gsc_range": [d.isoformat() for d in gsc_rng[0]],
+        "cur": flat(ga_cur, gsc_cur), "prev": flat(ga_prev, gsc_prev),
+        "queries": gsc_cur["queries"], "pages": gsc_cur["pages"],
+        "gsc_error": bool(gsc_cur.get("error")),
+    }
+
+
+def upsert_history(path: Path, snap: dict, keep: int = 400) -> None:
+    import json
+    hist = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    hist = [h for h in hist if h.get("date") != snap["date"]] + [snap]
+    hist = sorted(hist, key=lambda h: h["date"])[-keep:]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(hist, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"history: {len(hist)} 日分 → {path}")
+
+
+def post_slack(payload: dict) -> None:
     import requests
     url = os.environ.get("SLACK_WEBHOOK_URL", "")
     if not url:
         print("SLACK_WEBHOOK_URL 未設定のため Slack 送信スキップ", file=sys.stderr)
         return
-    r = requests.post(url, json={"text": text}, timeout=30)
+    r = requests.post(url, json=payload, timeout=30)
     r.raise_for_status()
     print("Slack に送信した")
 
@@ -250,6 +299,8 @@ def main() -> int:
     ap.add_argument("--slack", action="store_true", help="SLACK_WEBHOOK_URL に要約を送る")
     ap.add_argument("--date", help="集計基準日 YYYY-MM-DD（省略時は今日）")
     ap.add_argument("--replace", action="store_true", help="同日のブロックが既にあれば差し替える（権限追加後の再実行用）")
+    ap.add_argument("--history", help="ダッシュボード用 history.json のパス。当日分を upsert する")
+    ap.add_argument("--dashboard-url", default=os.environ.get("DASHBOARD_URL", ""), help="Slack のボタンから開くURL")
     args = ap.parse_args()
 
     if args.env_file:
@@ -286,10 +337,12 @@ def main() -> int:
     written = True
     if args.append:
         written = append_block(Path(args.append), md, f"### {today.isoformat()}", replace=args.replace)
+    if args.history:
+        upsert_history(Path(args.history), snapshot(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev))
     if args.slack and not written:
         print("同日ブロックをスキップしたので Slack 送信も省略")
     elif args.slack:
-        post_slack(render_slack(today, ga_cur, ga_prev, gsc_cur, gsc_prev))
+        post_slack(render_slack(today, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, args.dashboard_url))
     return 0
 
 

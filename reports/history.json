@@ -1,0 +1,138 @@
+[
+ {
+  "date": "2026-10-29",
+  "ga_range": [
+   "2026-10-22",
+   "2026-10-28"
+  ],
+  "gsc_range": [
+   "2026-10-20",
+   "2026-10-26"
+  ],
+  "cur": {
+   "sessions": 14,
+   "sessions_ext": 14,
+   "pv": 47,
+   "pv_ext": 47,
+   "affiliate_view": 2,
+   "affiliate_click": 0,
+   "topic_page_to_app": 1,
+   "gsc_impressions": 0,
+   "gsc_clicks": 0
+  },
+  "prev": {
+   "sessions": 3,
+   "sessions_ext": 3,
+   "pv": 3,
+   "pv_ext": 3,
+   "affiliate_view": 0,
+   "affiliate_click": 0,
+   "topic_page_to_app": 0,
+   "gsc_impressions": 0,
+   "gsc_clicks": 0
+  },
+  "queries": [],
+  "pages": [],
+  "gsc_error": false
+ },
+ {
+  "date": "2026-10-30",
+  "ga_range": [
+   "2026-10-23",
+   "2026-10-29"
+  ],
+  "gsc_range": [
+   "2026-10-21",
+   "2026-10-27"
+  ],
+  "cur": {
+   "sessions": 19,
+   "sessions_ext": 19,
+   "pv": 65,
+   "pv_ext": 65,
+   "affiliate_view": 2,
+   "affiliate_click": 0,
+   "topic_page_to_app": 1,
+   "gsc_impressions": 1,
+   "gsc_clicks": 0
+  },
+  "prev": {
+   "sessions": 3,
+   "sessions_ext": 3,
+   "pv": 3,
+   "pv_ext": 3,
+   "affiliate_view": 0,
+   "affiliate_click": 0,
+   "topic_page_to_app": 0,
+   "gsc_impressions": 0,
+   "gsc_clicks": 0
+  },
+  "queries": [
+   {
+    "key": "site:github.io",
+    "impressions": 1,
+    "clicks": 0,
+    "position": 55
+   }
+  ],
+  "pages": [
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/",
+    "impressions": 1,
+    "clicks": 0,
+    "position": 55
+   }
+  ],
+  "gsc_error": false
+ },
+ {
+  "date": "2026-10-31",
+  "ga_range": [
+   "2026-10-24",
+   "2026-10-30"
+  ],
+  "gsc_range": [
+   "2026-10-22",
+   "2026-10-28"
+  ],
+  "cur": {
+   "sessions": 28,
+   "sessions_ext": 27,
+   "pv": 109,
+   "pv_ext": 107,
+   "affiliate_view": 23,
+   "affiliate_click": 0,
+   "topic_page_to_app": 3,
+   "gsc_impressions": 1,
+   "gsc_clicks": 0
+  },
+  "prev": {
+   "sessions": 5,
+   "sessions_ext": 5,
+   "pv": 5,
+   "pv_ext": 5,
+   "affiliate_view": 0,
+   "affiliate_click": 0,
+   "topic_page_to_app": 0,
+   "gsc_impressions": 0,
+   "gsc_clicks": 0
+  },
+  "queries": [
+   {
+    "key": "site:github.io",
+    "impressions": 1,
+    "clicks": 0,
+    "position": 55
+   }
+  ],
+  "pages": [
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/",
+    "impressions": 1,
+    "clicks": 0,
+    "position": 55
+   }
+  ],
+  "gsc_error": false
+ }
+]

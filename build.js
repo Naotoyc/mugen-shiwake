@@ -492,7 +492,7 @@ fs.writeFileSync(path.join(__dirname, 'sitemap.xml'),
   urls.map(u => `  <url><loc>${u.loc}</loc><lastmod>${BUILD_DATE}</lastmod><priority>${u.priority}</priority></url>`).join('\n') +
   `\n</urlset>\n`);
 fs.writeFileSync(path.join(__dirname, 'robots.txt'),
-  `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`);
+  `User-agent: *\nAllow: /\nDisallow: /reports/\n\nSitemap: ${SITE_URL}sitemap.xml\n`);
 
 // index.html / about.html のアセット参照に ?v= を付け直す
 for (const f of ['index.html', 'about.html']) {
