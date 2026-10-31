@@ -1,7 +1,7 @@
-name: weekly-report
+name: daily-report
 
-# 無限仕訳 週次レポート（GA4 / GSC 直近7日・前週比）を Slack に送る。
-# 月曜 06:30 JST = 日曜 21:30 UTC。手動実行も可。
+# 無限仕訳 レポート（GA4 / GSC 直近7日・前週比）を毎朝 Slack に送る。
+# 毎日 06:30 JST = 21:30 UTC。手動実行も可。
 # 必要な Secrets:
 #   GOOGLE_SERVICE_ACCOUNT_JSON  サービスアカウント JSON の中身（toishi-revenue-os と共用）
 #   MUGEN_GA4_PROPERTY_ID        GA4 プロパティID（数字）
@@ -9,7 +9,7 @@ name: weekly-report
 
 on:
   schedule:
-    - cron: "30 21 * * 0"
+    - cron: "30 21 * * *"
   workflow_dispatch:
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
         env:
           SA_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
       - name: Run report
-        run: python tools/weekly_report.py --slack --out "$RUNNER_TEMP/weekly_report.md"
+        run: python tools/weekly_report.py --slack --out "$RUNNER_TEMP/report.md"
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ runner.temp }}/sa.json
           MUGEN_GA4_PROPERTY_ID: ${{ secrets.MUGEN_GA4_PROPERTY_ID }}
@@ -38,6 +38,6 @@ jobs:
           TZ: Asia/Tokyo
       - uses: actions/upload-artifact@v4
         with:
-          name: weekly-report
-          path: ${{ runner.temp }}/weekly_report.md
+          name: daily-report
+          path: ${{ runner.temp }}/report.md
           retention-days: 90

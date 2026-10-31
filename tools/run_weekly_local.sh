@@ -1,6 +1,6 @@
 #!/bin/sh
 # 無限仕訳 週次レポート（ローカル cron 用）。toishi-revenue-os の venv・.env・サービスアカウントを借りる。
-# cron: 30 6 * * 1 （月曜 06:30 JST）。Slack 送信は GitHub Actions（weekly-report.yml）側。ここは vault への追記のみ
+# cron: 30 6 * * 1 （月曜 06:30 JST）。Slack 送信は GitHub Actions（daily-report.yml、毎朝）側。ここは vault への追記のみ
 set -e
 cd "$(dirname "$0")/.."
 OS_DIR="$HOME/command-center/toishi-revenue-os"

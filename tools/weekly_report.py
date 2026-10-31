@@ -194,7 +194,7 @@ def render_slack(today: date, ga_cur, ga_prev, gsc_cur, gsc_prev) -> str:
     cv_c = ratio(ev_c["affiliate_click"], ev_c["affiliate_view"])
     cv_p = ratio(ev_p["affiliate_click"], ev_p["affiliate_view"])
     lines = [
-        f"*無限仕訳 週次 {today:%Y/%m/%d}*（直近7日 / 前週比）",
+        f"*無限仕訳 {today:%Y/%m/%d}*（直近7日 / 前週比）",
         f"• セッション {ga_cur['ext']['sessions']:,}（内部除外） {delta(ga_cur['ext']['sessions'], ga_prev['ext']['sessions'])}"
         f" ／ PV {ga_cur['ext']['pv']:,} {delta(ga_cur['ext']['pv'], ga_prev['ext']['pv'])}",
         f"• 教材カード view {ev_c['affiliate_view']} → click {ev_c['affiliate_click']}"
