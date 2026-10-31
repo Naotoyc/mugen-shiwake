@@ -708,7 +708,8 @@ function promoItemHtml(a, place, esc) {
   const attrs = `href="${esc(a.url)}" target="_blank" rel="sponsored noopener" data-aff="${esc(a.id)}" data-kind="${esc(a.kind)}" data-place="${esc(place)}"`;
   const micro = a.micro ? `<div class="promo-micro">${esc(a.micro)}</div>` : '';
   const banner = a.img ? `<li class="promo-banner">${a.display === 'banner' ? micro : ''}<a ${attrs}><img src="${esc(a.img)}" alt="${esc(a.label)}" width="${a.imgWidth || ''}" height="${a.imgHeight || ''}" loading="lazy"></a></li>` : '';
-  const button = `<li class="promo-btn-wrap">${micro}<a class="promo-btn" ${attrs}>${esc(a.cta || a.label)}</a></li>`;
+  const pixel = a.pixel ? `<img src="${esc(a.pixel)}" width="1" height="1" alt="" aria-hidden="true" class="promo-pixel">` : '';
+  const button = `<li class="promo-btn-wrap">${micro}<a class="promo-btn" ${attrs}>${esc(a.cta || a.label)}</a>${pixel}</li>`;
   if (a.display === 'both') return banner + button;
   if (a.display === 'button') return button;
   if (a.display === 'banner' && banner) return banner;

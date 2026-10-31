@@ -4,6 +4,7 @@
 // - 変更したら `node build.js` を再実行する（論点ページに反映。アプリ側は読み込むだけ）
 // - url: ASP の広告リンクの href（必須）
 // - display: 'both'=バナー＋ボタン / 'button'=micro（ボタン上の一言）＋cta（ボタン文言） / 'banner'=img のみ / 省略=label/lead のテキスト
+// - pixel: テキスト素材に付く 1×1 の計測画像 URL（任意。ボタン表示の時だけ出力）
 const AFFILIATES = [
   {
     id: 'book-sukkiri', kind: 'book',
@@ -22,7 +23,8 @@ const AFFILIATES = [
     label: '資格の大原（専門課程）',
     lead: '簿記・会計を学校で本格的に学ぶなら。資料請求はこちら',
     // アクセストレード。飛び先は専門課程（専門学校）ページ。簿記3級向けの講座プログラムが取れたら差し替える
-    url: 'https://h.accesstrade.net/sp/cc?rk=01002q1c00p1lz',
+    // 2026-10-31 クレアール（簿記直リンク）に差し替えたため停止。戻す時は url を入れる
+    url: '', // 'https://h.accesstrade.net/sp/cc?rk=01002q1c00p1lz'
     // display: 'both'（バナー＋マイクロコピー＋ボタン）/ 'button' / 'banner' / 省略でテキスト
     display: 'banner',
     micro: '＼資料請求は無料／',
@@ -31,9 +33,15 @@ const AFFILIATES = [
   },
   {
     id: 'course-crear', kind: 'course',
-    label: 'クレアール 簿記3級講座',
+    label: 'クレアール簿記アカデミー',
     lead: '独学で止まった人向け。短期で一気に仕上げる',
-    url: '',
+    // アクセストレード。テキスト素材（飛び先 crear-ac.co.jp/boki/ の簿記ページ）。バナー素材はトップページ行きしか無いので使わない
+    url: 'https://h.accesstrade.net/sp/cc?rk=01001zse00p1lz',
+    display: 'button',
+    micro: '＼資料請求は無料／',
+    cta: 'クレアール簿記アカデミーを見る →',
+    // ASP のインプレッション計測用 1×1 画像（テキスト素材に付属）
+    pixel: 'https://h.accesstrade.net/sp/rr?rk=01001zse00p1lz',
   },
   {
     id: 'course-studying', kind: 'course',
