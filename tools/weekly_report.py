@@ -283,9 +283,12 @@ def main() -> int:
     print(md)
     if args.out:
         Path(args.out).write_text(md + "\n", encoding="utf-8")
+    written = True
     if args.append:
-        append_block(Path(args.append), md, f"### {today.isoformat()}", replace=args.replace)
-    if args.slack:
+        written = append_block(Path(args.append), md, f"### {today.isoformat()}", replace=args.replace)
+    if args.slack and not written:
+        print("同日ブロックをスキップしたので Slack 送信も省略")
+    elif args.slack:
         post_slack(render_slack(today, ga_cur, ga_prev, gsc_cur, gsc_prev))
     return 0
 
