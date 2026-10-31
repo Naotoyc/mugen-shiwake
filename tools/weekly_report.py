@@ -205,7 +205,7 @@ def render_slack(today: date, ga_cur, ga_prev, gsc_cur, gsc_prev) -> str:
     ]
     if gsc_cur["queries"]:
         lines.append("• 上位クエリ: " + " / ".join(f"{r['key']}({r['impressions']})" for r in gsc_cur["queries"][:3]))
-    lines.append(f"詳細: progress.md の {SECTION_HEADING}")
+    lines.append("表の詳細: vault progress.md「週次レポート」（Mac起動時に追記）／GitHub Actions の Artifact")
     return "\n".join(lines)
 
 

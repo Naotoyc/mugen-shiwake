@@ -1,0 +1,43 @@
+name: weekly-report
+
+# 無限仕訳 週次レポート（GA4 / GSC 直近7日・前週比）を Slack に送る。
+# 月曜 06:30 JST = 日曜 21:30 UTC。手動実行も可。
+# 必要な Secrets:
+#   GOOGLE_SERVICE_ACCOUNT_JSON  サービスアカウント JSON の中身（toishi-revenue-os と共用）
+#   MUGEN_GA4_PROPERTY_ID        GA4 プロパティID（数字）
+#   SLACK_WEBHOOK_URL            10KChoices 日次レポートと同じ Webhook
+
+on:
+  schedule:
+    - cron: "30 21 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q google-analytics-data==0.18.8 google-api-python-client==2.128.0 google-auth==2.29.0 requests==2.31.0
+      - name: Write service account file
+        run: printf '%s' "$SA_JSON" > "$RUNNER_TEMP/sa.json"
+        env:
+          SA_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+      - name: Run report
+        run: python tools/weekly_report.py --slack --out "$RUNNER_TEMP/weekly_report.md"
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ runner.temp }}/sa.json
+          MUGEN_GA4_PROPERTY_ID: ${{ secrets.MUGEN_GA4_PROPERTY_ID }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TZ: Asia/Tokyo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report
+          path: ${{ runner.temp }}/weekly_report.md
+          retention-days: 90
