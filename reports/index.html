@@ -22,11 +22,14 @@ h2{font-size:15px;color:var(--text-sub);font-weight:600;margin:28px 0 10px;lette
 .tile .delta{display:inline-block;margin-top:4px;font-size:12px;padding:1px 7px;border-radius:999px;background:var(--border);color:var(--text-sub);font-variant-numeric:tabular-nums}
 .delta.up{background:var(--up-bg);color:var(--up)}.delta.down{background:var(--down-bg);color:var(--down)}
 .tile .prev{font-size:11px;color:var(--text-sub);margin-left:6px}
-.spark{display:block;width:100%;height:36px;margin-top:8px;overflow:visible}
-.spark path{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-.spark .area{fill:var(--accent);opacity:.08;stroke:none}
-.spark circle{fill:var(--card);stroke:var(--accent);stroke-width:2}
-.spark .hit{fill:transparent;stroke:none}
+.chart{display:block;width:100%;height:84px;margin-top:10px;overflow:visible}
+.chart .line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .area{fill:var(--accent);opacity:.08;stroke:none}
+.chart .dot{fill:var(--card);stroke:var(--accent);stroke-width:2}
+.chart .hit{fill:transparent;stroke:none}
+.chart .grid{stroke:var(--grid);stroke-width:1}
+.chart .axis{stroke:var(--text-sub);stroke-width:1;opacity:.6}
+.chart text{font-size:10px;fill:var(--text-sub);font-variant-numeric:tabular-nums}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px 14px;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
@@ -65,7 +68,7 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
 
 <footer>
   毎朝 06:30 に GitHub Actions が更新。各タイルの折れ線は「その日時点の直近7日値」の推移（<span id="ndays">-</span>日分）。
-  内部アクセスは <code>traffic_type=internal</code> を除外。Search Console は反映が遅いため3日前までで集計。
+  「内部除外」は <code>?internal=1</code> を一度開いた端末のアクセスを除いた値（端末ごとに設定が必要）。Search Console は反映が遅いため3日前までで集計。
   <br><a href="https://github.com/Naotoyc/mugen-shiwake/actions/workflows/daily-report.yml">Actions の実行ログ</a> ／ <a href="../">アプリへ</a>
 </footer>
 </div>
@@ -96,37 +99,71 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
     const d = (c - p) / p * 100; return {txt: (d >= 0 ? '+' : '') + d.toFixed(0) + '%', cls: d > 0 ? 'up' : d < 0 ? 'down' : ''};
   };
   const ratio = (a, b) => b ? a / b * 100 : 0;
-  const get = (h, k) => k === 'cvr' ? ratio(h.cur.affiliate_click, h.cur.affiliate_view) : h.cur[k];
-  const getPrev = (h, k) => k === 'cvr' ? ratio(h.prev.affiliate_click, h.prev.affiliate_view) : h.prev[k];
+  const get = (h, k) => k === 'cvr' ? ratio(h.cur.affiliate_click, h.cur.affiliate_view) : (h.cur[k] || 0);
+  const getPrev = (h, k) => k === 'cvr' ? ratio(h.prev.affiliate_click, h.prev.affiliate_view) : (h.prev[k] || 0);
 
-  function spark(key, pct) {
-    const W = 200, H = 36, pad = 4;
-    const vals = hist.map(h => get(h, key));
-    const max = Math.max(...vals, 1), min = Math.min(...vals, 0);
-    const x = i => hist.length === 1 ? W / 2 : pad + i * (W - 2 * pad) / (hist.length - 1);
-    const y = v => H - pad - (v - min) / (max - min || 1) * (H - 2 * pad);
-    const pts = vals.map((v, i) => [x(i), y(v)]);
-    const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-    const area = hist.length > 1 ? `${line} L${pts[pts.length-1][0].toFixed(1)} ${H} L${pts[0][0].toFixed(1)} ${H} Z` : '';
-    const dots = pts.map((p, i) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i === pts.length - 1 ? 4 : 2.5}"></circle>` +
-      `<circle class="hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="10" data-tip="${hist[i].date}: ${fmtN(vals[i], pct)}"></circle>`).join('');
-    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="${key} の推移">${area ? `<path class="area" d="${area}"></path>` : ''}${hist.length > 1 ? `<path d="${line}"></path>` : ''}${dots}</svg>`;
+  const fmtAxis = (v, pct) => pct ? v.toFixed(0) + '%' : (v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(v));
+  function niceMax(v) {
+    if (v <= 0) return 1;
+    const p = Math.pow(10, Math.floor(Math.log10(v)));
+    const n = v / p;
+    const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+    return step * p;
   }
+  function chart(key, pct, W) {
+    const H = 84, L = 30, R = 8, T = 6, B = 16;              // 左に y 軸ラベル、下に日付
+    const pw = W - L - R, ph = H - T - B;
+    const vals = hist.map(h => get(h, key));
+    const max = niceMax(Math.max(...vals));
+    const x = i => hist.length === 1 ? L + pw / 2 : L + i * pw / (hist.length - 1);
+    const y = v => T + ph - v / max * ph;                     // 基線は常に 0
+    const pts = vals.map((v, i) => [x(i), y(v)]);
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+    const area = hist.length > 1 ? `${d} L${pts[pts.length-1][0].toFixed(1)} ${y(0)} L${pts[0][0].toFixed(1)} ${y(0)} Z` : '';
+    const ticks = [0, max / 2, max];
+    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${key} の推移">`;
+    for (const tv of ticks) {
+      s += `<line class="${tv === 0 ? 'axis' : 'grid'}" x1="${L}" x2="${W - R}" y1="${y(tv).toFixed(1)}" y2="${y(tv).toFixed(1)}"></line>`;
+      s += `<text x="${L - 4}" y="${(y(tv) + 3.5).toFixed(1)}" text-anchor="end">${fmtAxis(tv, pct)}</text>`;
+    }
+    if (area) s += `<path class="area" d="${area}"></path><path class="line" d="${d}"></path>`;
+    pts.forEach((p, i) => {
+      s += `<circle class="dot" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i === pts.length - 1 ? 4 : 2.5}"></circle>`;
+      s += `<circle class="hit" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="12" data-tip="${hist[i].date}: ${fmtN(vals[i], pct)}"></circle>`;
+    });
+    // x 軸: 最初と最後の日付（点が多いときは中間も）
+    const xl = [0, hist.length - 1];
+    if (hist.length >= 5) xl.splice(1, 0, Math.floor((hist.length - 1) / 2));
+    for (const i of xl) {
+      const anchor = i === 0 ? 'start' : i === hist.length - 1 ? 'end' : 'middle';
+      s += `<text x="${x(i).toFixed(1)}" y="${H - 3}" text-anchor="${anchor}">${fmtD(hist[i].date)}</text>`;
+    }
+    return s + '</svg>';
+  }
+  function drawCharts() {
+    document.querySelectorAll('.tile[data-key]').forEach(el => {
+      const W = Math.max(120, Math.floor(el.clientWidth - 28));
+      el.querySelector('.chart-slot').innerHTML = chart(el.dataset.key, el.dataset.pct === '1', W);
+    });
+  }
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawCharts, 150); });
 
   function tile(label, key, pct) {
     const c = get(last, key), p = getPrev(last, key), d = delta(c, p, pct);
-    return `<div class="tile"><div class="label">${label}</div><div class="val">${fmtN(c, pct)}</div>` +
-      `<span class="delta ${d.cls}">${d.txt}</span><span class="prev">前週 ${fmtN(p, pct)}</span>${spark(key, pct)}</div>`;
+    return `<div class="tile" data-key="${key}" data-pct="${pct ? 1 : 0}"><div class="label">${label}</div><div class="val">${fmtN(c, pct)}</div>` +
+      `<span class="delta ${d.cls}">${d.txt}</span><span class="prev">前週 ${fmtN(p, pct)}</span><div class="chart-slot"></div></div>`;
   }
 
   $('kpi-access').innerHTML =
+    tile('ユーザー（内部除外）', 'users_ext') + tile('新規ユーザー（内部除外）', 'new_users_ext') +
     tile('セッション（内部除外）', 'sessions_ext') + tile('PV（内部除外）', 'pv_ext') +
-    tile('セッション（全体）', 'sessions') + tile('PV（全体）', 'pv');
+    tile('ユーザー（全体）', 'users') + tile('セッション（全体）', 'sessions') + tile('PV（全体）', 'pv');
   $('kpi-aff').innerHTML =
     tile('教材カード 表示', 'affiliate_view') + tile('教材カード クリック', 'affiliate_click') +
     tile('クリック率', 'cvr', true) + tile('論点ページ→アプリ', 'topic_page_to_app');
   $('kpi-gsc').innerHTML =
     tile('検索 表示回数', 'gsc_impressions') + tile('検索 クリック', 'gsc_clicks');
+  drawCharts();
   if (last.gsc_error) $('gsc-note').textContent = '最新日の Search Console 取得に失敗しています（権限を確認）。';
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

@@ -60,18 +60,19 @@ def ga4_fetch(property_id: str, sa_path: str, start: date, end: date) -> dict:
     resp = client.run_report(RunReportRequest(
         property=prop, date_ranges=dr,
         dimensions=[Dimension(name="testDataFilterName")],
-        metrics=[Metric(name="sessions"), Metric(name="screenPageViews")],
+        metrics=[Metric(name="sessions"), Metric(name="screenPageViews"),
+                 Metric(name="activeUsers"), Metric(name="newUsers")],
     ))
-    total = {"sessions": 0, "pv": 0}
-    ext = {"sessions": 0, "pv": 0}
+    keys = ("sessions", "pv", "users", "new_users")
+    total = dict.fromkeys(keys, 0)
+    ext = dict.fromkeys(keys, 0)
     for r in resp.rows:
         name = r.dimension_values[0].value
-        s, pv = int(r.metric_values[0].value), int(r.metric_values[1].value)
-        total["sessions"] += s
-        total["pv"] += pv
-        if "internal" not in name.lower():
-            ext["sessions"] += s
-            ext["pv"] += pv
+        vals = [int(m.value) for m in r.metric_values]
+        for k, v in zip(keys, vals):
+            total[k] += v
+            if "internal" not in name.lower():
+                ext[k] += v
 
     # 2) カスタムイベント件数
     resp = client.run_report(RunReportRequest(
@@ -156,6 +157,9 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) 
     row("　内部除外", ga_cur["ext"]["sessions"], ga_prev["ext"]["sessions"])
     row("表示回数（PV）", ga_cur["total"]["pv"], ga_prev["total"]["pv"])
     row("　内部除外", ga_cur["ext"]["pv"], ga_prev["ext"]["pv"])
+    row("ユーザー数", ga_cur["total"]["users"], ga_prev["total"]["users"])
+    row("　内部除外", ga_cur["ext"]["users"], ga_prev["ext"]["users"])
+    row("新規ユーザー（内部除外）", ga_cur["ext"]["new_users"], ga_prev["ext"]["new_users"])
     ev_c, ev_p = ga_cur["events"], ga_prev["events"]
     row("affiliate_view", ev_c["affiliate_view"], ev_p["affiliate_view"])
     row("affiliate_click", ev_c["affiliate_click"], ev_p["affiliate_click"])
@@ -202,6 +206,7 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
         return f"*{label}*\n{val}  ({delta(cur, prev, pct)})"
 
     fields = [
+        kpi("ユーザー（内部除外）", ga_cur["ext"]["users"], ga_prev["ext"]["users"]),
         kpi("セッション（内部除外）", ga_cur["ext"]["sessions"], ga_prev["ext"]["sessions"]),
         kpi("PV（内部除外）", ga_cur["ext"]["pv"], ga_prev["ext"]["pv"]),
         kpi("教材カード 表示", ev_c["affiliate_view"], ev_p["affiliate_view"]),
@@ -214,8 +219,8 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
     title = f"無限仕訳 {today:%-m/%-d}（{gs:%-m/%-d}〜{ge:%-m/%-d} の7日間・前週比）"
     blocks = [
         {"type": "header", "text": {"type": "plain_text", "text": title}},
-        {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[:4]]},
-        {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[4:]]},
+        {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[:5]]},
+        {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[5:]]},
     ]
     if gsc_cur["queries"]:
         top = " ／ ".join(f"{r['key']}（{r['impressions']}）" for r in gsc_cur["queries"][:3])
@@ -224,7 +229,7 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
         blocks.append({"type": "actions", "elements": [{
             "type": "button", "text": {"type": "plain_text", "text": "ダッシュボードを開く"},
             "url": dashboard_url, "style": "primary"}]})
-    text = (f"{title}: セッション {ga_cur['ext']['sessions']} / PV {ga_cur['ext']['pv']} / "
+    text = (f"{title}: ユーザー {ga_cur['ext']['users']} / セッション {ga_cur['ext']['sessions']} / PV {ga_cur['ext']['pv']} / "
             f"教材カード {ev_c['affiliate_view']}→{ev_c['affiliate_click']} / 検索表示 {gsc_cur['impressions']}")
     return {"text": text, "blocks": blocks}
 
@@ -257,6 +262,8 @@ def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) -
         return {
             "sessions": ga["total"]["sessions"], "sessions_ext": ga["ext"]["sessions"],
             "pv": ga["total"]["pv"], "pv_ext": ga["ext"]["pv"],
+            "users": ga["total"]["users"], "users_ext": ga["ext"]["users"],
+            "new_users": ga["total"]["new_users"], "new_users_ext": ga["ext"]["new_users"],
             **{e: ga["events"][e] for e in EVENTS},
             "gsc_impressions": gsc["impressions"], "gsc_clicks": gsc["clicks"],
         }
