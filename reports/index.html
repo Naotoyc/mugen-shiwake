@@ -27,6 +27,8 @@ h2{font-size:15px;color:var(--text-sub);font-weight:600;margin:28px 0 10px;lette
 .chart .area{fill:var(--accent);opacity:.08;stroke:none}
 .chart .dot{fill:var(--card);stroke:var(--accent);stroke-width:2}
 .chart .hit{fill:transparent;stroke:none}
+.bars rect.bar{fill:var(--accent);rx:3}
+.bars rect.hit{fill:transparent}
 .chart .grid{stroke:var(--grid);stroke-width:1}
 .chart .axis{stroke:var(--text-sub);stroke-width:1;opacity:.6}
 .chart text{font-size:10px;fill:var(--text-sub);font-variant-numeric:tabular-nums}
@@ -53,6 +55,9 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
 
 <h2>今日の所見</h2>
 <div class="card notes" id="notes"></div>
+
+<h2>伸び: 日別の新規ユーザー（内部除外・直近28日）</h2>
+<div class="card" id="daily-card"><div id="daily"></div><p class="note">1日に初めて来た人の数。自分の端末（?internal=1 設定済み）は含まない。この棒が増えていかなければ伸びていない。</p></div>
 
 <h2>アクセス（直近7日・前週比）</h2>
 <div class="grid" id="kpi-access"></div>
@@ -145,7 +150,29 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
     }
     return s + '</svg>';
   }
+  function drawDaily() {
+    const el = $('daily'), days = last.daily || [];
+    if (!days.length) { el.innerHTML = '<p class="empty">日別データは次回の更新から付きます</p>'; return; }
+    const W = Math.max(280, el.clientWidth), H = 120, L = 26, R = 6, T = 8, B = 18;
+    const pw = W - L - R, ph = H - T - B, n = days.length, gap = 2, bw = Math.max(2, pw / n - gap);
+    const max = niceMax(Math.max(...days.map(d => d.new_users_ext)));
+    const y = v => T + ph - v / max * ph;
+    let svg = `<svg class="chart bars" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="日別の新規ユーザー">`;
+    for (const tv of [0, max / 2, max]) {
+      svg += `<line class="${tv === 0 ? 'axis' : 'grid'}" x1="${L}" x2="${W - R}" y1="${y(tv).toFixed(1)}" y2="${y(tv).toFixed(1)}"></line>`;
+      svg += `<text x="${L - 4}" y="${(y(tv) + 3.5).toFixed(1)}" text-anchor="end">${fmtAxis(tv)}</text>`;
+    }
+    days.forEach((d, i) => {
+      const x = L + i * (pw / n) + gap / 2, h = (d.new_users_ext / max) * ph;
+      svg += `<rect class="bar" x="${x.toFixed(1)}" y="${(y(0) - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}"></rect>`;
+      svg += `<rect class="hit" x="${x.toFixed(1)}" y="${T}" width="${bw.toFixed(1)}" height="${ph}" data-tip="${d.date}: 新規 ${d.new_users_ext}人（ユーザー ${d.users_ext}）"></rect>`;
+      if (i === 0 || i === n - 1 || (n > 10 && i % 7 === 6))
+        svg += `<text x="${(x + bw / 2).toFixed(1)}" y="${H - 4}" text-anchor="middle">${fmtD(d.date)}</text>`;
+    });
+    el.innerHTML = svg + '</svg>';
+  }
   function drawCharts() {
+    drawDaily();
     document.querySelectorAll('.tile[data-key]').forEach(el => {
       const W = Math.max(120, Math.floor(el.clientWidth - 28));
       el.querySelector('.chart-slot').innerHTML = chart(el.dataset.key, el.dataset.pct === '1', W);

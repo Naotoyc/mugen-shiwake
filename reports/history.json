@@ -275,10 +275,152 @@
   ],
   "gsc_error": false,
   "notes": [
-   "外部ユーザー 10人（前週 3）、セッション 32、PV 113。 1人あたり 3.2 セッションで、少人数が繰り返し使っている。",
+   "外部ユーザー 10人（前週 3）、セッション 32、PV 113。 新規ユーザーは直近7日 8人（その前7日 2人）、新規ゼロの日が 4日。 1人あたり 3.2 セッションで、少人数が繰り返し使っている。",
    "教材カード 表示 28・クリック 0（0.0%）。表示 500 未満なので配置・文言の判断は保留。",
    "論点ページ→アプリ 3（前週 0）。",
    "検索表示 1（前週 0）、クリック 0。 一般クエリでの表示はまだなく、インデックス待ち。"
+  ],
+  "daily": [
+   {
+    "date": "2026-10-05",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-06",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-07",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-08",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-09",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-10",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-11",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-12",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-13",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-14",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-15",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-16",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-17",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-18",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-10-19",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-10-20",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-21",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-22",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-23",
+    "new_users_ext": 1,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-24",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-25",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-26",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-27",
+    "new_users_ext": 0,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-28",
+    "new_users_ext": 4,
+    "users_ext": 6
+   },
+   {
+    "date": "2026-10-29",
+    "new_users_ext": 0,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-30",
+    "new_users_ext": 3,
+    "users_ext": 5
+   },
+   {
+    "date": "2026-10-31",
+    "new_users_ext": 1,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-11-01",
+    "new_users_ext": 0,
+    "users_ext": 0
+   }
   ]
  }
 ]

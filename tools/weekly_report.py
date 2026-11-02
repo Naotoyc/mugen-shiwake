@@ -92,6 +92,37 @@ def ga4_fetch(property_id: str, sa_path: str, start: date, end: date) -> dict:
     return {"total": total, "ext": ext, "events": events}
 
 
+def ga4_daily(property_id: str, sa_path: str, start: date, end: date) -> list[dict]:
+    """日別の新規ユーザー・ユーザー（内部除外）。伸びの判定用。"""
+    from google.analytics.data_v1beta import BetaAnalyticsDataClient
+    from google.analytics.data_v1beta.types import DateRange, Dimension, Metric, RunReportRequest
+    from google.oauth2 import service_account
+    creds = service_account.Credentials.from_service_account_file(
+        sa_path, scopes=["https://www.googleapis.com/auth/analytics.readonly"])
+    client = BetaAnalyticsDataClient(credentials=creds)
+    resp = client.run_report(RunReportRequest(
+        property=f"properties/{property_id}",
+        date_ranges=[DateRange(start_date=start.isoformat(), end_date=end.isoformat())],
+        dimensions=[Dimension(name="date"), Dimension(name="testDataFilterName")],
+        metrics=[Metric(name="newUsers"), Metric(name="activeUsers")], limit=1000,
+    ))
+    by: dict[str, dict] = {}
+    for r in resp.rows:
+        d, name = r.dimension_values[0].value, r.dimension_values[1].value
+        if "internal" in name.lower():
+            continue
+        iso = f"{d[:4]}-{d[4:6]}-{d[6:]}"
+        row = by.setdefault(iso, {"date": iso, "new_users_ext": 0, "users_ext": 0})
+        row["new_users_ext"] += int(r.metric_values[0].value)
+        row["users_ext"] += int(r.metric_values[1].value)
+    days = []
+    d = start
+    while d <= end:
+        days.append(by.get(d.isoformat(), {"date": d.isoformat(), "new_users_ext": 0, "users_ext": 0}))
+        d += timedelta(days=1)
+    return days
+
+
 # ---------------------------------------------------------------- GSC
 def gsc_fetch(site_url: str, sa_path: str, start: date, end: date, top: bool) -> dict:
     from google.oauth2 import service_account
@@ -125,7 +156,7 @@ GSC_LOW, GSC_HIGH = 100, 500       # 2026-12-01 の判断基準（週あたり�
 AFF_MIN_VIEWS = 500                # 教材カードの判定に必要な表示回数（外部）
 
 
-def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None) -> list[str]:
+def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None, daily: list[dict] | None = None) -> list[str]:
     """数字を決まった基準で文章化する。順序は 1) 外部アクセス 2) 混入 3) 教材カード 4) 導線 5) 検索。"""
     out: list[str] = []
     c, p = ga_cur["ext"], ga_prev["ext"]
@@ -136,6 +167,10 @@ def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None) ->
     if week_ago and week_ago.get("cur", {}).get("users_ext") is not None:
         wa = week_ago["cur"]["users_ext"]
         s += f" 7日前の時点の7日値は {wa}人で{delta(c['users'], wa)}。"
+    if daily and len(daily) >= 14:
+        n7 = sum(d["new_users_ext"] for d in daily[-7:]); n14 = sum(d["new_users_ext"] for d in daily[-14:-7])
+        zero = sum(1 for d in daily[-7:] if d["new_users_ext"] == 0)
+        s += f" 新規ユーザーは直近7日 {n7}人（その前7日 {n14}人）、新規ゼロの日が {zero}日。"
     if c["users"] == 0:
         s += " 外部からの訪問はまだない。"
     elif c["sessions"] and c["users"] and c["sessions"] / c["users"] >= 3:
@@ -326,7 +361,7 @@ def append_block(path: Path, block: str, heading: str, replace: bool = False) ->
     return True
 
 
-def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes: list[str] | None = None) -> dict:
+def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes: list[str] | None = None, daily: list[dict] | None = None) -> dict:
     """ダッシュボード用の1日分スナップショット（直近7日と前週の値）。"""
     def flat(ga, gsc):
         return {
@@ -345,6 +380,7 @@ def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, n
         "queries": gsc_cur["queries"], "pages": gsc_cur["pages"],
         "gsc_error": bool(gsc_cur.get("error")),
         "notes": notes or [],
+        "daily": daily or [],
     }
 
 
@@ -400,6 +436,7 @@ def main() -> int:
 
     ga_cur = ga4_fetch(property_id, sa_path, *ga_rng[0])
     ga_prev = ga4_fetch(property_id, sa_path, *ga_rng[1])
+    daily = ga4_daily(property_id, sa_path, today - timedelta(days=28), today - timedelta(days=1))
     try:
         gsc_cur = gsc_fetch(site_url, sa_path, *gsc_rng[0], top=True)
         gsc_prev = gsc_fetch(site_url, sa_path, *gsc_rng[1], top=False)
@@ -413,7 +450,7 @@ def main() -> int:
         import json
         target = (today - timedelta(days=7)).isoformat()
         week_ago = next((h for h in json.loads(Path(args.history).read_text(encoding="utf-8")) if h.get("date") == target), None)
-    notes = analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago)
+    notes = analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago, daily)
 
     md = render_md(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes)
     print(md)
@@ -423,7 +460,7 @@ def main() -> int:
     if args.append:
         written = append_block(Path(args.append), md, f"### {today.isoformat()}", replace=args.replace)
     if args.history:
-        upsert_history(Path(args.history), snapshot(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes))
+        upsert_history(Path(args.history), snapshot(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes, daily))
     if args.slack and not written:
         print("同日ブロックをスキップしたので Slack 送信も省略")
     elif args.slack:
