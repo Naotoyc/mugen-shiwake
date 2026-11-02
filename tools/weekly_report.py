@@ -157,65 +157,69 @@ AFF_MIN_VIEWS = 500                # 教材カードの判定に必要な表示�
 
 
 def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None, daily: list[dict] | None = None) -> list[str]:
-    """数字を決まった基準で文章化する。順序は 1) 外部アクセス 2) 混入 3) 教材カード 4) 導線 5) 検索。"""
+    """数字を決まった基準で文章にする。順序は 1) 訪問 2) 内部混入 3) 教材カード 4) 論点ページからの移動 5) 検索。"""
     out: list[str] = []
     c, p = ga_cur["ext"], ga_prev["ext"]
     tot = ga_cur["total"]
 
-    # 1) 外部アクセス
-    s = f"外部ユーザー {c['users']}人（前週 {p['users']}）、セッション {c['sessions']}、PV {c['pv']}。"
+    # 1) 訪問（内部を除く）
+    s = (f"内部を除いた訪問者は {c['users']}人でした（前週は {p['users']}人）。"
+         f"訪問回数は {c['sessions']}回、ページ表示は {c['pv']}回でした。")
     if week_ago and week_ago.get("cur", {}).get("users_ext") is not None:
         wa = week_ago["cur"]["users_ext"]
-        s += f" 7日前の時点の7日値は {wa}人で{delta(c['users'], wa)}。"
+        s += f" 7日前の時点の同じ集計では {wa}人だったので、{delta(c['users'], wa)} の変化です。"
     if daily and len(daily) >= 14:
         n7 = sum(d["new_users_ext"] for d in daily[-7:]); n14 = sum(d["new_users_ext"] for d in daily[-14:-7])
         zero = sum(1 for d in daily[-7:] if d["new_users_ext"] == 0)
-        s += f" 新規ユーザーは直近7日 {n7}人（その前7日 {n14}人）、新規ゼロの日が {zero}日。"
+        s += f" 初めて訪問した人は直近7日で {n7}人、その前の7日で {n14}人でした。初めての訪問者がいなかった日は直近7日のうち {zero}日ありました。"
     if c["users"] == 0:
-        s += " 外部からの訪問はまだない。"
+        s += " 内部を除くと、訪問はまだありません。"
     elif c["sessions"] and c["users"] and c["sessions"] / c["users"] >= 3:
-        s += f" 1人あたり {c['sessions']/c['users']:.1f} セッションで、少人数が繰り返し使っている。"
+        s += f" 1人あたりの訪問回数は {c['sessions']/c['users']:.1f}回で、少人数が繰り返し使っています。"
     out.append(s)
 
     # 2) 内部混入
     if tot["pv"]:
         mix = 1 - c["pv"] / tot["pv"]
         if mix >= 0.3:
-            out.append(f"内部アクセスが PV の {mix*100:.0f}% を占める。未設定の端末で ?internal=1 を開いてから数字を信用する。")
+            out.append(f"内部のアクセスがページ表示の {mix*100:.0f}% を占めています。設定していない端末で ?internal=1 を開いてから、数字を判断に使ってください。")
         elif tot["users"] - c["users"] == 0 and tot["pv"] > 20:
-            out.append("内部フラグ付きのアクセスが 0。自分の端末が全て計測に入っている可能性が高い。")
+            out.append("内部として記録されたアクセスが 0 でした。自分の端末のアクセスがすべて集計に入っている可能性が高いです。")
 
     # 3) 教材カード
     ev, evp = ga_cur["events"], ga_prev["events"]
     v, k = ev["affiliate_view"], ev["affiliate_click"]
     cvr = ratio(k, v)
+    s = f"教材カードは {v}回表示され、{k}回クリックされました（クリック率 {cvr:.1f}%）。"
     if v < AFF_MIN_VIEWS:
-        out.append(f"教材カード 表示 {v}・クリック {k}（{cvr:.1f}%）。表示 {AFF_MIN_VIEWS} 未満なので配置・文言の判断は保留。")
+        s += f" 表示回数が {AFF_MIN_VIEWS}回未満なので、配置と文言の判断は保留します。"
     elif cvr < 1.0:
-        out.append(f"教材カード 表示 {v}・クリック {k}（{cvr:.1f}%）。1% 未満。出す条件（つまずき時）と文言を変える。")
+        s += " クリック率が 1% 未満なので、カードを出す条件（つまずいたとき）と文言を変える必要があります。"
     else:
-        out.append(f"教材カード 表示 {v}・クリック {k}（{cvr:.1f}%）。クリックは出ている。次は成果通知で発生件数を追う。")
+        s += " クリックは出ています。次は成果通知で発生件数を追います。"
+    out.append(s)
 
-    # 4) 導線
+    # 4) 論点ページからの移動
     tp = ev["topic_page_to_app"]
     if tp or evp["topic_page_to_app"]:
-        out.append(f"論点ページからアプリへ移動した回数は {tp}（前週 {evp['topic_page_to_app']}）。")
+        out.append(f"論点ページからアプリへ移動した回数は {tp}回でした（前週は {evp['topic_page_to_app']}回）。")
 
     # 5) 検索
     gi, gc = gsc_cur["impressions"], gsc_cur["clicks"]
     if gsc_cur.get("error"):
-        out.append("検索（GSC）は取得失敗。権限を確認。")
+        out.append("Search Console のデータを取得できませんでした。サービスアカウントの権限を確認してください。")
     else:
         real_q = [q for q in gsc_cur["queries"] if not q["key"].startswith("site:")]
-        s = f"検索表示 {gi}（前週 {gsc_prev['impressions']}）、クリック {gc}。"
+        s = f"Google 検索に表示された回数は {gi}回（前週は {gsc_prev['impressions']}回）、検索からクリックされた回数は {gc}回でした。"
+        top = "、".join(q["key"] for q in real_q[:3])
         if gi == 0 or not real_q:
-            s += " 一般クエリでの表示はまだなく、インデックス待ち。"
+            s += " 一般的な検索語での表示はまだなく、インデックス登録を待っている段階です。"
         elif gi < GSC_LOW:
-            s += f" 週 {GSC_LOW} 未満で SEO は立ち上がり前。上位クエリ: " + "／".join(q["key"] for q in real_q[:3]) + "。"
+            s += f" 週 {GSC_LOW}回未満なので、検索流入はまだ立ち上がっていません。表示が多い検索語は「{top}」です。"
         elif gi < GSC_HIGH:
-            s += f" 週 {GSC_LOW}〜{GSC_HIGH} で拾われ始めている。上位クエリ: " + "／".join(q["key"] for q in real_q[:3]) + "。"
+            s += f" 週 {GSC_LOW}回から {GSC_HIGH}回の範囲で、検索に拾われ始めています。表示が多い検索語は「{top}」です。"
         else:
-            s += f" 週 {GSC_HIGH} 超。論点ページの第2問追加と2級導線に時間を割く段階。"
+            s += f" 週 {GSC_HIGH}回を超えました。論点ページに第2問を追加し、2級講座への導線に時間を割く段階です。"
         out.append(s)
     return out
 
@@ -223,9 +227,9 @@ def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None, da
 # ---------------------------------------------------------------- 表示
 def delta(cur: float, prev: float, pct: bool = False) -> str:
     if pct:
-        return f"{cur - prev:+.1f}pt"
+        return f"{cur - prev:+.1f}ポイント"
     if prev == 0:
-        return "—" if cur == 0 else "new"
+        return "変化なし" if cur == 0 else "前週は 0"
     return f"{(cur - prev) / prev * 100:+.0f}%"
 
 
@@ -243,31 +247,31 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, 
     L = []
     L.append(f"### {today.isoformat()}")
     L.append("")
-    L.append(f"GA4 集計 {gs:%m/%d}〜{ge:%m/%d}（前週 {gps:%m/%d}〜{gpe:%m/%d}）"
-             f" / GSC 集計 {ss:%m/%d}〜{se:%m/%d}（反映遅れのため3日前まで）")
+    L.append(f"GA4 は {gs:%m/%d}から{ge:%m/%d}までを集計し、前週は {gps:%m/%d}から{gpe:%m/%d}までです。"
+             f" Search Console は反映が遅れるため {ss:%m/%d}から{se:%m/%d}までを集計しています。")
     L.append("")
-    L.append("| 指標 | 今週 | 前週 | 前週比 |")
+    L.append("| 項目 | 今週 | 前週 | 前週からの変化 |")
     L.append("|---|---:|---:|---:|")
 
     def row(label, c, p, pct=False, fmt="{:,}"):
         f = (lambda v: f"{v:.1f}%") if pct else (lambda v: fmt.format(v))
         L.append(f"| {label} | {f(c)} | {f(p)} | {delta(c, p, pct)} |")
 
-    row("セッション", ga_cur["total"]["sessions"], ga_prev["total"]["sessions"])
-    row("　内部除外", ga_cur["ext"]["sessions"], ga_prev["ext"]["sessions"])
-    row("表示回数（PV）", ga_cur["total"]["pv"], ga_prev["total"]["pv"])
-    row("　内部除外", ga_cur["ext"]["pv"], ga_prev["ext"]["pv"])
-    row("ユーザー数", ga_cur["total"]["users"], ga_prev["total"]["users"])
-    row("　内部除外", ga_cur["ext"]["users"], ga_prev["ext"]["users"])
-    row("新規ユーザー（内部除外）", ga_cur["ext"]["new_users"], ga_prev["ext"]["new_users"])
+    row("訪問回数（セッション）", ga_cur["total"]["sessions"], ga_prev["total"]["sessions"])
+    row("　うち内部を除いた回数", ga_cur["ext"]["sessions"], ga_prev["ext"]["sessions"])
+    row("ページが表示された回数（PV）", ga_cur["total"]["pv"], ga_prev["total"]["pv"])
+    row("　うち内部を除いた回数", ga_cur["ext"]["pv"], ga_prev["ext"]["pv"])
+    row("訪問した人数（ユーザー）", ga_cur["total"]["users"], ga_prev["total"]["users"])
+    row("　うち内部を除いた人数", ga_cur["ext"]["users"], ga_prev["ext"]["users"])
+    row("初めて訪問した人数（内部を除く）", ga_cur["ext"]["new_users"], ga_prev["ext"]["new_users"])
     ev_c, ev_p = ga_cur["events"], ga_prev["events"]
-    row("affiliate_view", ev_c["affiliate_view"], ev_p["affiliate_view"])
-    row("affiliate_click", ev_c["affiliate_click"], ev_p["affiliate_click"])
-    row("click/view", ratio(ev_c["affiliate_click"], ev_c["affiliate_view"]),
+    row("教材カードが表示された回数（affiliate_view）", ev_c["affiliate_view"], ev_p["affiliate_view"])
+    row("教材カードがクリックされた回数（affiliate_click）", ev_c["affiliate_click"], ev_p["affiliate_click"])
+    row("教材カードのクリック率（クリック÷表示）", ratio(ev_c["affiliate_click"], ev_c["affiliate_view"]),
         ratio(ev_p["affiliate_click"], ev_p["affiliate_view"]), pct=True)
-    row("論点ページからアプリへ移動（topic_page_to_app）", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"])
-    row("GSC 表示回数", gsc_cur["impressions"], gsc_prev["impressions"])
-    row("GSC クリック", gsc_cur["clicks"], gsc_prev["clicks"])
+    row("論点ページからアプリへ移動した回数（topic_page_to_app）", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"])
+    row("Google 検索に表示された回数（GSC）", gsc_cur["impressions"], gsc_prev["impressions"])
+    row("Google 検索からクリックされた回数（GSC）", gsc_cur["clicks"], gsc_prev["clicks"])
     L.append("")
     if notes:
         L.append("所見")
@@ -276,25 +280,25 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, 
         L.append("")
 
     if gsc_cur["queries"]:
-        L.append("GSC 表示回数 上位クエリ")
+        L.append("Google 検索で表示回数が多かった検索語（上位5件）")
         L.append("")
-        L.append("| クエリ | 表示 | クリック | 順位 |")
+        L.append("| 検索語 | 表示された回数 | クリックされた回数 | 平均順位 |")
         L.append("|---|---:|---:|---:|")
         for r in gsc_cur["queries"]:
             L.append(f"| {r['key']} | {r['impressions']} | {r['clicks']} | {r['position']:.1f} |")
         L.append("")
     if gsc_cur["pages"]:
-        L.append("GSC 表示回数 上位ページ")
+        L.append("Google 検索で表示回数が多かったページ（上位5件）")
         L.append("")
-        L.append("| ページ | 表示 | クリック | 順位 |")
+        L.append("| ページ | 表示された回数 | クリックされた回数 | 平均順位 |")
         L.append("|---|---:|---:|---:|")
         for r in gsc_cur["pages"]:
             L.append(f"| {short_page(r['key'])} | {r['impressions']} | {r['clicks']} | {r['position']:.1f} |")
         L.append("")
     if gsc_cur.get("error"):
-        L.append("GSC: 取得失敗（サービスアカウントの権限を確認）。上の GSC 行は 0 扱い")
+        L.append("Search Console のデータを取得できませんでした。上の表の GSC の行は 0 として扱っています。サービスアカウントの権限を確認してください。")
     elif not gsc_cur["queries"] and not gsc_cur["pages"]:
-        L.append("GSC 上位クエリ／ページ: データなし（表示回数0）")
+        L.append("Google 検索での表示はまだないため、検索語とページの表は空です。")
         L.append("")
     return "\n".join(L)
 
@@ -311,17 +315,17 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
         return f"*{label}*\n{val}  ({delta(cur, prev, pct)})"
 
     fields = [
-        kpi("ユーザー（内部除外）", ga_cur["ext"]["users"], ga_prev["ext"]["users"]),
-        kpi("セッション（内部除外）", ga_cur["ext"]["sessions"], ga_prev["ext"]["sessions"]),
-        kpi("PV（内部除外）", ga_cur["ext"]["pv"], ga_prev["ext"]["pv"]),
-        kpi("教材カード 表示", ev_c["affiliate_view"], ev_p["affiliate_view"]),
-        kpi("教材カード クリック", ev_c["affiliate_click"], ev_p["affiliate_click"]),
-        kpi("クリック率", cv_c, cv_p, pct=True),
-        kpi("論点ページからアプリへ移動", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"]),
-        kpi("Google 検索 表示", gsc_cur["impressions"], gsc_prev["impressions"]),
-        kpi("Google 検索 クリック", gsc_cur["clicks"], gsc_prev["clicks"]),
+        kpi("訪問した人数（内部を除く）", ga_cur["ext"]["users"], ga_prev["ext"]["users"]),
+        kpi("訪問回数（内部を除く）", ga_cur["ext"]["sessions"], ga_prev["ext"]["sessions"]),
+        kpi("ページが表示された回数（内部を除く）", ga_cur["ext"]["pv"], ga_prev["ext"]["pv"]),
+        kpi("教材カードが表示された回数", ev_c["affiliate_view"], ev_p["affiliate_view"]),
+        kpi("教材カードがクリックされた回数", ev_c["affiliate_click"], ev_p["affiliate_click"]),
+        kpi("教材カードのクリック率", cv_c, cv_p, pct=True),
+        kpi("論点ページからアプリへ移動した回数", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"]),
+        kpi("Google 検索に表示された回数", gsc_cur["impressions"], gsc_prev["impressions"]),
+        kpi("Google 検索からクリックされた回数", gsc_cur["clicks"], gsc_prev["clicks"]),
     ]
-    title = f"無限仕訳 {today:%-m/%-d}（{gs:%-m/%-d}〜{ge:%-m/%-d} の7日間・前週比）"
+    title = f"無限仕訳 {today:%-m/%-d} の報告（{gs:%-m/%-d}から{ge:%-m/%-d}までの7日間と、その前の7日間の比較）"
     blocks = [
         {"type": "header", "text": {"type": "plain_text", "text": title}},
         {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[:5]]},
@@ -332,10 +336,10 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
         blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": "*所見*\n" + "\n".join(f"• {n}" for n in notes)}})
     if dashboard_url:
         blocks.append({"type": "actions", "elements": [{
-            "type": "button", "text": {"type": "plain_text", "text": "ダッシュボードを開く"},
+            "type": "button", "text": {"type": "plain_text", "text": "ダッシュボードを開きます"},
             "url": dashboard_url, "style": "primary"}]})
-    text = (f"{title}: ユーザー {ga_cur['ext']['users']} / セッション {ga_cur['ext']['sessions']} / PV {ga_cur['ext']['pv']} / "
-            f"教材カード 表示 {ev_c['affiliate_view']} クリック {ev_c['affiliate_click']} / 検索表示 {gsc_cur['impressions']}")
+    text = (f"{title}: 訪問者 {ga_cur['ext']['users']}人 / 訪問 {ga_cur['ext']['sessions']}回 / ページ表示 {ga_cur['ext']['pv']}回 / "
+            f"教材カードの表示 {ev_c['affiliate_view']}回 クリック {ev_c['affiliate_click']}回 / Google 検索での表示 {gsc_cur['impressions']}回")
     return {"text": text, "blocks": blocks}
 
 

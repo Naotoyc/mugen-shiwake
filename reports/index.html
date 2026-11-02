@@ -17,7 +17,7 @@ h2{font-size:15px;color:var(--text-sub);font-weight:600;margin:28px 0 10px;lette
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media (min-width:640px){.grid{grid-template-columns:repeat(4,1fr)}}
 .tile{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 14px 10px;min-width:0}
-.tile .label{font-size:12px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .label{font-size:12px;color:var(--text-sub);line-height:1.35;min-height:2.7em}
 .tile .val{font-size:28px;font-weight:700;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums}
 .tile .delta{display:inline-block;margin-top:4px;font-size:12px;padding:1px 7px;border-radius:999px;background:var(--border);color:var(--text-sub);font-variant-numeric:tabular-nums}
 .delta.up{background:var(--up-bg);color:var(--up)}.delta.down{background:var(--down-bg);color:var(--down)}
@@ -56,29 +56,29 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
 <h2>今日の所見</h2>
 <div class="card notes" id="notes"></div>
 
-<h2>伸び: 日別の新規ユーザー（内部除外・直近28日）</h2>
-<div class="card" id="daily-card"><div id="daily"></div><p class="note">1日に初めて来た人の数。自分の端末（?internal=1 設定済み）は含まない。この棒が増えていかなければ伸びていない。</p></div>
+<h2>初めて訪問した人数（1日ごと、内部を除く、直近28日）</h2>
+<div class="card" id="daily-card"><div id="daily"></div><p class="note">その日に初めてサイトを訪問した人数です。?internal=1 を設定した自分の端末は含みません。この棒が日を追って高くなっていなければ、サイトは伸びていません。</p></div>
 
-<h2>アクセス（直近7日・前週比）</h2>
+<h2>訪問（直近7日間と、その前の7日間の比較）</h2>
 <div class="grid" id="kpi-access"></div>
 
-<h2>教材カード・導線</h2>
+<h2>教材カードと、論点ページからアプリへの移動</h2>
 <div class="grid" id="kpi-aff"></div>
 
-<h2>Google 検索（Search Console）</h2>
+<h2>Google 検索での表示とクリック（Search Console）</h2>
 <div class="grid" id="kpi-gsc"></div>
 <p class="note" id="gsc-note"></p>
 
-<h2>検索クエリ 上位（表示回数順）</h2>
+<h2>Google 検索で表示回数が多かった検索語（上位5件）</h2>
 <div class="card"><table id="tbl-q"></table></div>
 
-<h2>検索ページ 上位（表示回数順）</h2>
+<h2>Google 検索で表示回数が多かったページ（上位5件）</h2>
 <div class="card"><table id="tbl-p"></table></div>
 
 <footer>
-  毎朝 06:30 に GitHub Actions が更新。各タイルの折れ線は「その日時点の直近7日値」の推移（<span id="ndays">-</span>日分）。
-  「内部除外」は <code>?internal=1</code> を一度開いた端末のアクセスを除いた値（端末ごとに設定が必要）。Search Console は反映が遅いため3日前までで集計。
-  <br><a href="https://github.com/Naotoyc/mugen-shiwake/actions/workflows/daily-report.yml">Actions の実行ログ</a> ／ <a href="../">アプリへ</a>
+  このページは毎朝 06:30 に GitHub Actions が更新します。各タイルの折れ線は、その日の時点で集計した直近7日間の値を日ごとに並べたものです（<span id="ndays">-</span>日分）。
+  「内部を除く」は、<code>?internal=1</code> を一度開いた端末からのアクセスを除いた値です。端末ごとに設定が必要です。Search Console は反映が遅れるため、3日前までを集計しています。
+  <br><a href="https://github.com/Naotoyc/mugen-shiwake/actions/workflows/daily-report.yml">GitHub Actions の実行ログを開きます</a> ／ <a href="../">アプリに戻ります</a>
 </footer>
 </div>
 <div class="tip" id="tip"></div>
@@ -98,14 +98,14 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
   if (!hist.length) { $('sub').textContent = 'データがまだありません'; return; }
   const last = hist[hist.length - 1];
   const fmtD = s => { const [y,m,d] = s.split('-'); return `${+m}/${+d}`; };
-  $('sub').textContent = `更新 ${last.date}（GA4 ${fmtD(last.ga_range[0])}〜${fmtD(last.ga_range[1])} ／ 検索 ${fmtD(last.gsc_range[0])}〜${fmtD(last.gsc_range[1])}、前週は各7日前）`;
+  $('sub').textContent = `${last.date} に更新しました。GA4 は ${fmtD(last.ga_range[0])}から${fmtD(last.ga_range[1])}まで、Google 検索は ${fmtD(last.gsc_range[0])}から${fmtD(last.gsc_range[1])}までを集計し、「前週」はそれぞれ7日前の同じ期間です。`;
   $('ndays').textContent = hist.length;
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const fmtN = (v, pct) => pct ? v.toFixed(1) + '%' : v.toLocaleString('ja-JP');
   const delta = (c, p, pct) => {
-    if (pct) { const d = c - p; return {txt: (d >= 0 ? '+' : '') + d.toFixed(1) + 'pt', cls: d > 0 ? 'up' : d < 0 ? 'down' : ''}; }
-    if (p === 0) return {txt: c === 0 ? '—' : 'new', cls: c > 0 ? 'up' : ''};
+    if (pct) { const d = c - p; return {txt: (d >= 0 ? '+' : '') + d.toFixed(1) + 'ポイント', cls: d > 0 ? 'up' : d < 0 ? 'down' : ''}; }
+    if (p === 0) return {txt: c === 0 ? '変化なし' : '前週は 0', cls: c > 0 ? 'up' : ''};
     const d = (c - p) / p * 100; return {txt: (d >= 0 ? '+' : '') + d.toFixed(0) + '%', cls: d > 0 ? 'up' : d < 0 ? 'down' : ''};
   };
   const ratio = (a, b) => b ? a / b * 100 : 0;
@@ -152,7 +152,7 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
   }
   function drawDaily() {
     const el = $('daily'), days = last.daily || [];
-    if (!days.length) { el.innerHTML = '<p class="empty">日別データは次回の更新から付きます</p>'; return; }
+    if (!days.length) { el.innerHTML = '<p class="empty">1日ごとのデータは次回の更新から表示されます。</p>'; return; }
     const W = Math.max(280, el.clientWidth), H = 120, L = 26, R = 6, T = 8, B = 18;
     const pw = W - L - R, ph = H - T - B, n = days.length, gap = 2, bw = Math.max(2, pw / n - gap);
     const max = niceMax(Math.max(...days.map(d => d.new_users_ext)));
@@ -165,7 +165,7 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
     days.forEach((d, i) => {
       const x = L + i * (pw / n) + gap / 2, h = (d.new_users_ext / max) * ph;
       svg += `<rect class="bar" x="${x.toFixed(1)}" y="${(y(0) - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}"></rect>`;
-      svg += `<rect class="hit" x="${x.toFixed(1)}" y="${T}" width="${bw.toFixed(1)}" height="${ph}" data-tip="${d.date}: 新規 ${d.new_users_ext}人（ユーザー ${d.users_ext}）"></rect>`;
+      svg += `<rect class="hit" x="${x.toFixed(1)}" y="${T}" width="${bw.toFixed(1)}" height="${ph}" data-tip="${d.date}: 初めての訪問者 ${d.new_users_ext}人、訪問者 ${d.users_ext}人"></rect>`;
       if (i === 0 || i === n - 1 || (n > 10 && i % 7 === 6))
         svg += `<text x="${(x + bw / 2).toFixed(1)}" y="${H - 4}" text-anchor="middle">${fmtD(d.date)}</text>`;
     });
@@ -183,30 +183,30 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
   function tile(label, key, pct) {
     const c = get(last, key), p = getPrev(last, key), d = delta(c, p, pct);
     return `<div class="tile" data-key="${key}" data-pct="${pct ? 1 : 0}"><div class="label">${label}</div><div class="val">${fmtN(c, pct)}</div>` +
-      `<span class="delta ${d.cls}">${d.txt}</span><span class="prev">前週 ${fmtN(p, pct)}</span><div class="chart-slot"></div></div>`;
+      `<span class="delta ${d.cls}">${d.txt}</span><span class="prev">前週は ${fmtN(p, pct)}</span><div class="chart-slot"></div></div>`;
   }
 
   $('kpi-access').innerHTML =
-    tile('ユーザー（内部除外）', 'users_ext') + tile('新規ユーザー（内部除外）', 'new_users_ext') +
-    tile('セッション（内部除外）', 'sessions_ext') + tile('PV（内部除外）', 'pv_ext') +
-    tile('ユーザー（全体）', 'users') + tile('セッション（全体）', 'sessions') + tile('PV（全体）', 'pv');
+    tile('訪問した人数（内部を除く）', 'users_ext') + tile('初めて訪問した人数（内部を除く）', 'new_users_ext') +
+    tile('訪問回数（内部を除く）', 'sessions_ext') + tile('ページが表示された回数（内部を除く）', 'pv_ext') +
+    tile('訪問した人数（内部を含む）', 'users') + tile('訪問回数（内部を含む）', 'sessions') + tile('ページが表示された回数（内部を含む）', 'pv');
   $('kpi-aff').innerHTML =
-    tile('教材カード 表示', 'affiliate_view') + tile('教材カード クリック', 'affiliate_click') +
-    tile('クリック率', 'cvr', true) + tile('論点ページからアプリへ移動', 'topic_page_to_app');
+    tile('教材カードが表示された回数', 'affiliate_view') + tile('教材カードがクリックされた回数', 'affiliate_click') +
+    tile('教材カードのクリック率', 'cvr', true) + tile('論点ページからアプリへ移動した回数', 'topic_page_to_app');
   $('kpi-gsc').innerHTML =
-    tile('検索 表示回数', 'gsc_impressions') + tile('検索 クリック', 'gsc_clicks');
+    tile('Google 検索に表示された回数', 'gsc_impressions') + tile('Google 検索からクリックされた回数', 'gsc_clicks');
   $('notes').innerHTML = (last.notes && last.notes.length)
     ? '<ul>' + last.notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>'
-    : '<p class="empty">所見はまだありません（次回の更新から付きます）</p>';
+    : '<p class="empty">所見はまだありません。次回の更新から表示されます。</p>';
   drawCharts();
-  if (last.gsc_error) $('gsc-note').textContent = '最新日の Search Console 取得に失敗しています（権限を確認）。';
+  if (last.gsc_error) $('gsc-note').textContent = '最新の更新で Search Console のデータを取得できませんでした。サービスアカウントの権限を確認してください。';
 
   function table(id, rows, head, keyCell) {
-    if (!rows || !rows.length) { $(id).innerHTML = `<tr><td class="empty">まだデータがありません（検索に出始めると並びます）</td></tr>`; return; }
-    $(id).innerHTML = `<tr><th>${head}</th><th class="n">表示</th><th class="n">クリック</th><th class="n">順位</th></tr>` +
+    if (!rows || !rows.length) { $(id).innerHTML = `<tr><td class="empty">Google 検索での表示がまだないため、空です。検索に表示され始めると、ここに並びます。</td></tr>`; return; }
+    $(id).innerHTML = `<tr><th>${head}</th><th class="n">表示された回数</th><th class="n">クリックされた回数</th><th class="n">平均順位</th></tr>` +
       rows.map(r => `<tr><td>${keyCell(r.key)}</td><td class="n">${r.impressions}</td><td class="n">${r.clicks}</td><td class="n">${r.position.toFixed(1)}</td></tr>`).join('');
   }
-  table('tbl-q', last.queries, 'クエリ', k => esc(k));
+  table('tbl-q', last.queries, '検索語', k => esc(k));
   table('tbl-p', last.pages, 'ページ', k => `<a href="${esc(k)}" target="_blank" rel="noopener">${esc(k.replace(SITE, '/'))}</a>`);
 
   // ツールチップ
