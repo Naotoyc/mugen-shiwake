@@ -199,7 +199,7 @@ def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None, da
     # 4) 導線
     tp = ev["topic_page_to_app"]
     if tp or evp["topic_page_to_app"]:
-        out.append(f"論点ページ→アプリ {tp}（前週 {evp['topic_page_to_app']}）。")
+        out.append(f"論点ページからアプリへ移動した回数は {tp}（前週 {evp['topic_page_to_app']}）。")
 
     # 5) 検索
     gi, gc = gsc_cur["impressions"], gsc_cur["clicks"]
@@ -265,7 +265,7 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, 
     row("affiliate_click", ev_c["affiliate_click"], ev_p["affiliate_click"])
     row("click/view", ratio(ev_c["affiliate_click"], ev_c["affiliate_view"]),
         ratio(ev_p["affiliate_click"], ev_p["affiliate_view"]), pct=True)
-    row("topic_page_to_app", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"])
+    row("論点ページからアプリへ移動（topic_page_to_app）", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"])
     row("GSC 表示回数", gsc_cur["impressions"], gsc_prev["impressions"])
     row("GSC クリック", gsc_cur["clicks"], gsc_prev["clicks"])
     L.append("")
@@ -317,7 +317,7 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
         kpi("教材カード 表示", ev_c["affiliate_view"], ev_p["affiliate_view"]),
         kpi("教材カード クリック", ev_c["affiliate_click"], ev_p["affiliate_click"]),
         kpi("クリック率", cv_c, cv_p, pct=True),
-        kpi("論点ページ→アプリ", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"]),
+        kpi("論点ページからアプリへ移動", ev_c["topic_page_to_app"], ev_p["topic_page_to_app"]),
         kpi("Google 検索 表示", gsc_cur["impressions"], gsc_prev["impressions"]),
         kpi("Google 検索 クリック", gsc_cur["clicks"], gsc_prev["clicks"]),
     ]
@@ -335,7 +335,7 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
             "type": "button", "text": {"type": "plain_text", "text": "ダッシュボードを開く"},
             "url": dashboard_url, "style": "primary"}]})
     text = (f"{title}: ユーザー {ga_cur['ext']['users']} / セッション {ga_cur['ext']['sessions']} / PV {ga_cur['ext']['pv']} / "
-            f"教材カード {ev_c['affiliate_view']}→{ev_c['affiliate_click']} / 検索表示 {gsc_cur['impressions']}")
+            f"教材カード 表示 {ev_c['affiliate_view']} クリック {ev_c['affiliate_click']} / 検索表示 {gsc_cur['impressions']}")
     return {"text": text, "blocks": blocks}
 
 

@@ -192,7 +192,7 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
     tile('ユーザー（全体）', 'users') + tile('セッション（全体）', 'sessions') + tile('PV（全体）', 'pv');
   $('kpi-aff').innerHTML =
     tile('教材カード 表示', 'affiliate_view') + tile('教材カード クリック', 'affiliate_click') +
-    tile('クリック率', 'cvr', true) + tile('論点ページ→アプリ', 'topic_page_to_app');
+    tile('クリック率', 'cvr', true) + tile('論点ページからアプリへ移動', 'topic_page_to_app');
   $('kpi-gsc').innerHTML =
     tile('検索 表示回数', 'gsc_impressions') + tile('検索 クリック', 'gsc_clicks');
   $('notes').innerHTML = (last.notes && last.notes.length)
