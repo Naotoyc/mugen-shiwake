@@ -30,6 +30,7 @@ h2{font-size:15px;color:var(--text-sub);font-weight:600;margin:28px 0 10px;lette
 .chart .grid{stroke:var(--grid);stroke-width:1}
 .chart .axis{stroke:var(--text-sub);stroke-width:1;opacity:.6}
 .chart text{font-size:10px;fill:var(--text-sub);font-variant-numeric:tabular-nums}
+.notes{padding:10px 16px}.notes ul{margin:4px 0;padding-left:18px}.notes li{margin:6px 0}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:6px 14px;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:8px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
@@ -49,6 +50,9 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
   <h1>無限仕訳 ダッシュボード</h1>
   <p class="sub" id="sub">読み込み中…</p>
 </header>
+
+<h2>今日の所見</h2>
+<div class="card notes" id="notes"></div>
 
 <h2>アクセス（直近7日・前週比）</h2>
 <div class="grid" id="kpi-access"></div>
@@ -92,6 +96,7 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
   $('sub').textContent = `更新 ${last.date}（GA4 ${fmtD(last.ga_range[0])}〜${fmtD(last.ga_range[1])} ／ 検索 ${fmtD(last.gsc_range[0])}〜${fmtD(last.gsc_range[1])}、前週は各7日前）`;
   $('ndays').textContent = hist.length;
 
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const fmtN = (v, pct) => pct ? v.toFixed(1) + '%' : v.toLocaleString('ja-JP');
   const delta = (c, p, pct) => {
     if (pct) { const d = c - p; return {txt: (d >= 0 ? '+' : '') + d.toFixed(1) + 'pt', cls: d > 0 ? 'up' : d < 0 ? 'down' : ''}; }
@@ -163,10 +168,12 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
     tile('クリック率', 'cvr', true) + tile('論点ページ→アプリ', 'topic_page_to_app');
   $('kpi-gsc').innerHTML =
     tile('検索 表示回数', 'gsc_impressions') + tile('検索 クリック', 'gsc_clicks');
+  $('notes').innerHTML = (last.notes && last.notes.length)
+    ? '<ul>' + last.notes.map(n => '<li>' + esc(n) + '</li>').join('') + '</ul>'
+    : '<p class="empty">所見はまだありません（次回の更新から付きます）</p>';
   drawCharts();
   if (last.gsc_error) $('gsc-note').textContent = '最新日の Search Console 取得に失敗しています（権限を確認）。';
 
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   function table(id, rows, head, keyCell) {
     if (!rows || !rows.length) { $(id).innerHTML = `<tr><td class="empty">まだデータがありません（検索に出始めると並びます）</td></tr>`; return; }
     $(id).innerHTML = `<tr><th>${head}</th><th class="n">表示</th><th class="n">クリック</th><th class="n">順位</th></tr>` +

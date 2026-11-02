@@ -120,6 +120,71 @@ def gsc_fetch(site_url: str, sa_path: str, start: date, end: date, top: bool) ->
     return out
 
 
+# ---------------------------------------------------------------- 所見
+GSC_LOW, GSC_HIGH = 100, 500       # 2026-12-01 の判断基準（週あたり検索表示回数）
+AFF_MIN_VIEWS = 500                # 教材カードの判定に必要な表示回数（外部）
+
+
+def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None) -> list[str]:
+    """数字を決まった基準で文章化する。順序は 1) 外部アクセス 2) 混入 3) 教材カード 4) 導線 5) 検索。"""
+    out: list[str] = []
+    c, p = ga_cur["ext"], ga_prev["ext"]
+    tot = ga_cur["total"]
+
+    # 1) 外部アクセス
+    s = f"外部ユーザー {c['users']}人（前週 {p['users']}）、セッション {c['sessions']}、PV {c['pv']}。"
+    if week_ago and week_ago.get("cur", {}).get("users_ext") is not None:
+        wa = week_ago["cur"]["users_ext"]
+        s += f" 7日前の時点の7日値は {wa}人で{delta(c['users'], wa)}。"
+    if c["users"] == 0:
+        s += " 外部からの訪問はまだない。"
+    elif c["sessions"] and c["users"] and c["sessions"] / c["users"] >= 3:
+        s += f" 1人あたり {c['sessions']/c['users']:.1f} セッションで、少人数が繰り返し使っている。"
+    out.append(s)
+
+    # 2) 内部混入
+    if tot["pv"]:
+        mix = 1 - c["pv"] / tot["pv"]
+        if mix >= 0.3:
+            out.append(f"内部アクセスが PV の {mix*100:.0f}% を占める。未設定の端末で ?internal=1 を開いてから数字を信用する。")
+        elif tot["users"] - c["users"] == 0 and tot["pv"] > 20:
+            out.append("内部フラグ付きのアクセスが 0。自分の端末が全て計測に入っている可能性が高い。")
+
+    # 3) 教材カード
+    ev, evp = ga_cur["events"], ga_prev["events"]
+    v, k = ev["affiliate_view"], ev["affiliate_click"]
+    cvr = ratio(k, v)
+    if v < AFF_MIN_VIEWS:
+        out.append(f"教材カード 表示 {v}・クリック {k}（{cvr:.1f}%）。表示 {AFF_MIN_VIEWS} 未満なので配置・文言の判断は保留。")
+    elif cvr < 1.0:
+        out.append(f"教材カード 表示 {v}・クリック {k}（{cvr:.1f}%）。1% 未満。出す条件（つまずき時）と文言を変える。")
+    else:
+        out.append(f"教材カード 表示 {v}・クリック {k}（{cvr:.1f}%）。クリックは出ている。次は成果通知で発生件数を追う。")
+
+    # 4) 導線
+    tp = ev["topic_page_to_app"]
+    if tp or evp["topic_page_to_app"]:
+        out.append(f"論点ページ→アプリ {tp}（前週 {evp['topic_page_to_app']}）。")
+
+    # 5) 検索
+    gi, gc = gsc_cur["impressions"], gsc_cur["clicks"]
+    if gsc_cur.get("error"):
+        out.append("検索（GSC）は取得失敗。権限を確認。")
+    else:
+        real_q = [q for q in gsc_cur["queries"] if not q["key"].startswith("site:")]
+        s = f"検索表示 {gi}（前週 {gsc_prev['impressions']}）、クリック {gc}。"
+        if gi == 0 or not real_q:
+            s += " 一般クエリでの表示はまだなく、インデックス待ち。"
+        elif gi < GSC_LOW:
+            s += f" 週 {GSC_LOW} 未満で SEO は立ち上がり前。上位クエリ: " + "／".join(q["key"] for q in real_q[:3]) + "。"
+        elif gi < GSC_HIGH:
+            s += f" 週 {GSC_LOW}〜{GSC_HIGH} で拾われ始めている。上位クエリ: " + "／".join(q["key"] for q in real_q[:3]) + "。"
+        else:
+            s += f" 週 {GSC_HIGH} 超。論点ページの第2問追加と2級導線に時間を割く段階。"
+        out.append(s)
+    return out
+
+
 # ---------------------------------------------------------------- 表示
 def delta(cur: float, prev: float, pct: bool = False) -> str:
     if pct:
@@ -137,7 +202,7 @@ def short_page(url: str) -> str:
     return url.replace(SITE_URL_DEFAULT, "/") or "/"
 
 
-def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) -> str:
+def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes: list[str] | None = None) -> str:
     (gs, ge), (gps, gpe) = ga_rng
     (ss, se), (sps, spe) = gsc_rng
     L = []
@@ -169,6 +234,11 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) 
     row("GSC 表示回数", gsc_cur["impressions"], gsc_prev["impressions"])
     row("GSC クリック", gsc_cur["clicks"], gsc_prev["clicks"])
     L.append("")
+    if notes:
+        L.append("所見")
+        L.append("")
+        L.extend(f"- {n}" for n in notes)
+        L.append("")
 
     if gsc_cur["queries"]:
         L.append("GSC 表示回数 上位クエリ")
@@ -194,7 +264,7 @@ def render_md(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) 
     return "\n".join(L)
 
 
-def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashboard_url: str = "") -> dict:
+def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashboard_url: str = "", notes: list[str] | None = None) -> dict:
     """Slack Incoming Webhook 用 payload（blocks）。数字は「今週 → 前週比」で揃える。"""
     (gs, ge), _ = ga_rng
     ev_c, ev_p = ga_cur["events"], ga_prev["events"]
@@ -222,9 +292,9 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
         {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[:5]]},
         {"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in fields[5:]]},
     ]
-    if gsc_cur["queries"]:
-        top = " ／ ".join(f"{r['key']}（{r['impressions']}）" for r in gsc_cur["queries"][:3])
-        blocks.append({"type": "context", "elements": [{"type": "mrkdwn", "text": f"検索クエリ 上位: {top}"}]})
+    if notes:
+        blocks.append({"type": "divider"})
+        blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": "*所見*\n" + "\n".join(f"• {n}" for n in notes)}})
     if dashboard_url:
         blocks.append({"type": "actions", "elements": [{
             "type": "button", "text": {"type": "plain_text", "text": "ダッシュボードを開く"},
@@ -256,7 +326,7 @@ def append_block(path: Path, block: str, heading: str, replace: bool = False) ->
     return True
 
 
-def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) -> dict:
+def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes: list[str] | None = None) -> dict:
     """ダッシュボード用の1日分スナップショット（直近7日と前週の値）。"""
     def flat(ga, gsc):
         return {
@@ -274,6 +344,7 @@ def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev) -
         "cur": flat(ga_cur, gsc_cur), "prev": flat(ga_prev, gsc_prev),
         "queries": gsc_cur["queries"], "pages": gsc_cur["pages"],
         "gsc_error": bool(gsc_cur.get("error")),
+        "notes": notes or [],
     }
 
 
@@ -337,7 +408,14 @@ def main() -> int:
         empty = {"impressions": 0, "clicks": 0, "queries": [], "pages": []}
         gsc_cur, gsc_prev = dict(empty, error=True), dict(empty)
 
-    md = render_md(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev)
+    week_ago = None
+    if args.history and Path(args.history).exists():
+        import json
+        target = (today - timedelta(days=7)).isoformat()
+        week_ago = next((h for h in json.loads(Path(args.history).read_text(encoding="utf-8")) if h.get("date") == target), None)
+    notes = analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago)
+
+    md = render_md(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes)
     print(md)
     if args.out:
         Path(args.out).write_text(md + "\n", encoding="utf-8")
@@ -345,11 +423,11 @@ def main() -> int:
     if args.append:
         written = append_block(Path(args.append), md, f"### {today.isoformat()}", replace=args.replace)
     if args.history:
-        upsert_history(Path(args.history), snapshot(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev))
+        upsert_history(Path(args.history), snapshot(today, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, notes))
     if args.slack and not written:
         print("同日ブロックをスキップしたので Slack 送信も省略")
     elif args.slack:
-        post_slack(render_slack(today, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, args.dashboard_url))
+        post_slack(render_slack(today, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, args.dashboard_url, notes))
     return 0
 
 
