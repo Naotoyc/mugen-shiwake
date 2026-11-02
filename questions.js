@@ -978,14 +978,14 @@ const QUESTION_TEMPLATES = [
     }
   },
   {
-    id: 87, topic: '貸倒引当金戻入', tags: ['貸倒引当金戻入', '貸倒引当金', '現金'],
+    id: 87, topic: '償却債権取立益', tags: ['償却債権取立益', '貸倒損失', '現金'],
     generate: () => {
       const recovered = (Math.floor(Math.random() * 5) + 1) * 10000;
       return {
         question: `前期に貸倒処理した売掛金${fmt(recovered)}円が現金で回収された。`,
         debit:  [{ account: '現金',           amount: recovered }],
-        credit: [{ account: '貸倒引当金戻入', amount: recovered }],
-        explanation: '前期貸倒済み→回収は収益（貸倒引当金戻入）貸方に計上、現金（資産↑）借方。'
+        credit: [{ account: '償却債権取立益', amount: recovered }],
+        explanation: '前期に貸倒処理した債権の回収は償却債権取立益（収益↑）貸方、現金（資産↑）借方。貸倒引当金戻入は使わない。'
       };
     }
   },
@@ -1764,16 +1764,16 @@ const QUESTION_TEMPLATES = [
     }
   },
   {
-    id: 163, topic: '普通預金', tags: ['普通預金', '受取利息'],
+    id: 163, topic: '普通預金', tags: ['普通預金', '受取利息', '仮払法人税等'],
     generate: () => {
       const gross  = (Math.floor(Math.random() * 9) + 1) * 1000;
       const tax    = Math.round(gross * 0.2 / 100) * 100;
       const net    = gross - tax;
       return {
         question: `普通預金の利息${fmt(net)}円（税引後）が入金された。なお源泉所得税${fmt(tax)}円が差し引かれている。`,
-        debit:  [{ account: '普通預金', amount: net }, { account: '租税公課', amount: tax }],
+        debit:  [{ account: '普通預金', amount: net }, { account: '仮払法人税等', amount: tax }],
         credit: [{ account: '受取利息', amount: gross }],
-        explanation: `利息${fmt(gross)}円（収益）から税${fmt(tax)}円控除済み。差引入金額${fmt(net)}円が普通預金。税額は租税公課（費用）借方。`
+        explanation: `利息${fmt(gross)}円（収益）を総額で貸方。差し引かれた源泉所得税${fmt(tax)}円は法人税の前払いなので仮払法人税等（資産）借方。入金額${fmt(net)}円が普通預金。`
       };
     }
   },
@@ -1784,10 +1784,10 @@ const QUESTION_TEMPLATES = [
       const fee  = 500;
       const net  = recv - fee;
       return {
-        question: `売掛金${fmt(recv)}円が普通預金に振り込まれた。振込手数料${fmt(fee)}円は先方負担のため差し引かれている。`,
+        question: `売掛金${fmt(recv)}円が普通預金に振り込まれた。振込手数料${fmt(fee)}円は当社負担のため差し引かれている。`,
         debit:  [{ account: '普通預金', amount: net }, { account: '支払手数料', amount: fee }],
         credit: [{ account: '売掛金', amount: recv }],
-        explanation: `売掛金${fmt(recv)}円回収。手数料${fmt(fee)}円は先方負担でも当社が費用計上。入金額${fmt(net)}円。`
+        explanation: `売掛金${fmt(recv)}円を全額貸方で消す。当社負担の手数料${fmt(fee)}円は支払手数料（費用）借方。差引入金額${fmt(net)}円が普通預金。`
       };
     }
   },
@@ -2020,28 +2020,24 @@ const QUESTION_TEMPLATES = [
 
   // ===== 受取手形 追加 (3) =====
   {
-    id: 182, topic: '受取手形', tags: ['受取手形', '普通預金', '支払手数料'],
-    generate: () => {
-      const face = (Math.floor(Math.random() * 9) + 1) * 10000;
-      const disc = Math.round(face * 0.02 / 100) * 100;
-      const proc = face - disc;
-      return {
-        question: `所持する約束手形${fmt(face)}円を銀行で割り引き、割引料${fmt(disc)}円を差し引いた手取金${fmt(proc)}円が普通預金に入金された。`,
-        debit:  [{ account: '普通預金', amount: proc }, { account: '支払手数料', amount: disc }],
-        credit: [{ account: '受取手形', amount: face }],
-        explanation: `手形割引：受取手形（資産↓）貸方、普通預金${fmt(proc)}円（資産↑）・支払手数料${fmt(disc)}円（費用）借方。`
-      };
-    }
+    id: 182, topic: '受取手形', tags: ['受取手形', '当座預金'],
+    generate: (a) => ({
+      question: `取立てを依頼していた約束手形${fmt(a)}円が満期日に取り立てられ、当座預金に入金された。`,
+      debit:  [{ account: '当座預金', amount: a }],
+      credit: [{ account: '受取手形', amount: a }],
+      explanation: `手形の満期回収：受取手形（資産↓）貸方、当座預金（資産↑）借方。手形の割引・裏書譲渡は簿記2級の範囲。`
+    })
   },
   {
-    id: 183, topic: '受取手形', tags: ['受取手形', '仕入', '買掛金'],
+    id: 183, topic: '受取手形', tags: ['受取手形', '売掛金', '売上'],
     generate: () => {
-      const goods = (Math.floor(Math.random() * 9) + 1) * 10000;
+      const goods = (Math.floor(Math.random() * 9) + 1) * 20000;
+      const note  = goods / 2;
       return {
-        question: `商品${fmt(goods)}円を仕入れ、所持していた約束手形を裏書きして支払った。`,
-        debit:  [{ account: '仕入', amount: goods }],
-        credit: [{ account: '受取手形', amount: goods }],
-        explanation: `手形の裏書き譲渡：仕入（費用↑）借方、受取手形（資産↓）貸方。`
+        question: `商品${fmt(goods)}円を販売し、代金のうち${fmt(note)}円は得意先振出の約束手形で受け取り、残額は掛けとした。`,
+        debit:  [{ account: '受取手形', amount: note }, { account: '売掛金', amount: goods - note }],
+        credit: [{ account: '売上', amount: goods }],
+        explanation: `売上${fmt(goods)}円（収益↑）貸方。受取手形${fmt(note)}円・売掛金${fmt(goods - note)}円（各資産↑）借方。`
       };
     }
   },
@@ -2066,18 +2062,13 @@ const QUESTION_TEMPLATES = [
     })
   },
   {
-    id: 186, topic: '支払手形', tags: ['支払手形', '普通預金', '現金'],
-    generate: () => {
-      const face = (Math.floor(Math.random() * 9) + 1) * 10000;
-      const new_face = face + (Math.floor(Math.random() * 3) + 1) * 1000;
-      const interest = new_face - face;
-      return {
-        question: `支払手形${fmt(face)}円の期日が到来したが、資金不足のため利息${fmt(interest)}円を加えた新手形${fmt(new_face)}円に更改した。`,
-        debit:  [{ account: '支払手形', amount: face }, { account: '支払利息', amount: interest }],
-        credit: [{ account: '支払手形', amount: new_face }],
-        explanation: `手形更改：旧手形${fmt(face)}円消去（借方）、利息${fmt(interest)}円（費用）、新手形${fmt(new_face)}円計上（貸方）。`
-      };
-    }
+    id: 186, topic: '支払手形', tags: ['支払手形', '当座預金'],
+    generate: (a) => ({
+      question: `振り出していた約束手形${fmt(a)}円の満期日が到来し、当座預金から引き落とされた。`,
+      debit:  [{ account: '支払手形', amount: a }],
+      credit: [{ account: '当座預金', amount: a }],
+      explanation: `手形の満期決済：支払手形（負債↓）借方、当座預金（資産↓）貸方。手形の更改は簿記2級の範囲。`
+    })
   },
   {
     id: 187, topic: '支払手形', tags: ['支払手形', '仕入', '現金'],
@@ -2213,10 +2204,10 @@ const QUESTION_TEMPLATES = [
   {
     id: 195, topic: '租税公課', tags: ['租税公課', '普通預金'],
     generate: (a) => ({
-      question: `法人住民税${fmt(a)}円を普通預金から納付した。`,
+      question: `固定資産税${fmt(a)}円を普通預金から納付した。`,
       debit:  [{ account: '租税公課', amount: a }],
       credit: [{ account: '普通預金', amount: a }],
-      explanation: `租税公課（費用↑）借方、普通預金（資産↓）貸方。住民税の納付処理。`
+      explanation: `固定資産税は租税公課（費用↑）借方、普通預金（資産↓）貸方。法人住民税は租税公課ではなく法人税等で処理する。`
     })
   },
   {
@@ -2706,16 +2697,16 @@ const QUESTION_TEMPLATES = [
     })
   },
   {
-    id: 236, topic: '発送費', tags: ['発送費', '売掛金', '売上'],
+    id: 236, topic: '発送費', tags: ['発送費', '売掛金', '売上', '現金'],
     generate: () => {
       const sales = (Math.floor(Math.random() * 9) + 1) * 10000;
       const ship  = (Math.floor(Math.random() * 5) + 1) * 500;
       const total = sales + ship;
       return {
-        question: `商品${fmt(sales)}円を掛けで販売し、発送費${fmt(ship)}円は売掛金に含めて請求した。`,
+        question: `商品${fmt(sales)}円を掛けで販売し、先方負担の発送費${fmt(ship)}円を現金で立替払いして売掛金に含めて請求した。`,
         debit:  [{ account: '売掛金', amount: total }],
-        credit: [{ account: '売上', amount: sales }, { account: '発送費', amount: ship }],
-        explanation: `売掛金${fmt(total)}円（借方）、売上${fmt(sales)}円・発送費${fmt(ship)}円（先方負担→貸方）。`
+        credit: [{ account: '売上', amount: sales }, { account: '現金', amount: ship }],
+        explanation: `先方負担の発送費は当社の費用にしない。立て替えた${fmt(ship)}円を売掛金に含めるので売掛金${fmt(total)}円（借方）、売上${fmt(sales)}円・現金${fmt(ship)}円（貸方）。`
       };
     }
   },
