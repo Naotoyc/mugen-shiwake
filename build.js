@@ -8,6 +8,7 @@ const fs   = require('fs');
 const path = require('path');
 const { QUESTION_TEMPLATES } = require('./questions.js');
 const { AFFILIATES } = require('./affiliates.js');
+const { TOPIC_CONTENT } = require('./topics-content.js');
 
 const crypto = require('crypto');
 // キャッシュ対策: アセット内容のハッシュを ?v= に付ける（index.html / about.html にも書き戻す）
@@ -357,8 +358,11 @@ function topicPage(name) {
   const url   = `${SITE_URL}topics/${slug}/`;
   const n     = examples.length;
   const level = overallDifficulty(examples);
+  const guide = TOPIC_CONTENT[name];
   const title = `${name}の仕訳｜簿記3級 例題${n}問と解説【${SITE_NAME}】`;
-  const description = `簿記3級「${name}」の仕訳を例題${n}問で解説。借方・貸方の考え方を1問ずつ確認できます（${level}）。無料アプリで同じ論点を無限に反復練習できます。`;
+  const description = guide
+    ? `簿記3級「${name}」の仕訳を解説。${guide.lead}例題${n}問と無料の練習アプリ付きです。`
+    : `簿記3級「${name}」の仕訳を例題${n}問で解説。借方・貸方の考え方を1問ずつ確認できます（${level}）。無料アプリで同じ論点を無限に反復練習できます。`;
   const crumbs = [
     { name: SITE_NAME, href: '../../', url: SITE_URL },
     { name: '論点一覧', href: '../', url: `${SITE_URL}topics/` },
@@ -382,7 +386,17 @@ function topicPage(name) {
       breadcrumbJsonLd(crumbs),
     ],
   };
+  if (guide && guide.faq && guide.faq.length) {
+    jsonLd['@graph'].push({
+      '@type': 'FAQPage',
+      mainEntity: guide.faq.map(f => ({
+        '@type': 'Question', name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    });
+  }
   const appHref = `../../?topic=${encodeURIComponent(name)}`;
+  const guideHtml = guide ? guideSection(guide) : '';
 
   const examplesHtml = examples.map((ex, i) => `
     <article class="question-card example" id="q${ex.id}">
@@ -419,12 +433,33 @@ function topicPage(name) {
     <a class="btn btn-check cta" href="${appHref}">「${esc(name)}」をアプリで反復練習 →</a>
   </section>
   <main>
+    ${guideHtml}
+    ${guide ? `<h2 class="section-title">例題${n}問で確認する</h2>` : ''}
     ${examplesHtml}
     <a class="btn btn-next cta" href="${appHref}">「${esc(name)}」の問題を無限に解く →</a>
     <p class="cta-note">金額がランダムに変わる同じ論点の問題を、答え合わせ・解説付きで何問でも解けます。無料・登録不要。</p>
     ${affiliateBlock(`「${name}」を紙や講座で固めるなら`, 'topic_page')}
     ${relatedHtml}
   </main>` + foot('../../');
+}
+
+// 解説セクション（topics-content.js の内容）
+function guideSection(g) {
+  const para = body => (body || []).map(t => `<p>${esc(t)}</p>`).join('\n        ');
+  const list = items => items && items.length ? `<ul>${items.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
+  const sections = (g.sections || []).map(sec => `
+      <section class="guide-section">
+        <h2 class="section-title">${esc(sec.heading)}</h2>
+        ${para(sec.body)}
+        ${list(sec.list)}
+      </section>`).join('\n');
+  const faq = g.faq && g.faq.length ? `
+      <section class="guide-section faq" aria-label="よくある質問">
+        <h2 class="section-title">よくある質問</h2>
+        ${g.faq.map(f => `<h3 class="faq-q">${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('\n        ')}
+      </section>` : '';
+  return `<div class="guide">${sections}${faq}
+    </div>`;
 }
 
 // ── 論点一覧ページ ──
