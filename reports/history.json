@@ -422,5 +422,211 @@
     "users_ext": 0
    }
   ]
+ },
+ {
+  "date": "2026-11-03",
+  "ga_range": [
+   "2026-10-27",
+   "2026-11-02"
+  ],
+  "gsc_range": [
+   "2026-10-25",
+   "2026-10-31"
+  ],
+  "cur": {
+   "sessions": 36,
+   "sessions_ext": 35,
+   "pv": 124,
+   "pv_ext": 122,
+   "users": 11,
+   "users_ext": 10,
+   "new_users": 8,
+   "new_users_ext": 8,
+   "affiliate_view": 35,
+   "affiliate_click": 0,
+   "topic_page_to_app": 3,
+   "gsc_impressions": 1,
+   "gsc_clicks": 0
+  },
+  "prev": {
+   "sessions": 2,
+   "sessions_ext": 2,
+   "pv": 2,
+   "pv_ext": 2,
+   "users": 2,
+   "users_ext": 2,
+   "new_users": 1,
+   "new_users_ext": 1,
+   "affiliate_view": 0,
+   "affiliate_click": 0,
+   "topic_page_to_app": 0,
+   "gsc_impressions": 0,
+   "gsc_clicks": 0
+  },
+  "queries": [
+   {
+    "key": "site:github.io",
+    "impressions": 1,
+    "clicks": 0,
+    "position": 55
+   }
+  ],
+  "pages": [
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/",
+    "impressions": 1,
+    "clicks": 0,
+    "position": 55
+   }
+  ],
+  "gsc_error": false,
+  "notes": [
+   "内部を除いた訪問者は 10人でした（前週は 2人）。訪問回数は 35回、ページ表示は 122回でした。 初めて訪問した人は直近7日で 8人、その前の7日で 1人でした。初めての訪問者がいなかった日は直近7日のうち 4日ありました。 1人あたりの訪問回数は 3.5回で、少人数が繰り返し使っています。",
+   "教材カードは 35回表示され、0回クリックされました（クリック率 0.0%）。 表示回数が 500回未満なので、配置と文言の判断は保留します。",
+   "論点ページからアプリへ移動した回数は 3回でした（前週は 0回）。",
+   "Google 検索に表示された回数は 1回（前週は 0回）、検索からクリックされた回数は 0回でした。 一般的な検索語での表示はまだなく、インデックス登録を待っている段階です。"
+  ],
+  "daily": [
+   {
+    "date": "2026-10-06",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-07",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-08",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-09",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-10",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-11",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-12",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-13",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-14",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-15",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-16",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-17",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-18",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-10-19",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-10-20",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-21",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-22",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-23",
+    "new_users_ext": 1,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-24",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-25",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-26",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-10-27",
+    "new_users_ext": 0,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-28",
+    "new_users_ext": 4,
+    "users_ext": 6
+   },
+   {
+    "date": "2026-10-29",
+    "new_users_ext": 0,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-30",
+    "new_users_ext": 3,
+    "users_ext": 5
+   },
+   {
+    "date": "2026-10-31",
+    "new_users_ext": 1,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-11-01",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-02",
+    "new_users_ext": 0,
+    "users_ext": 1
+   }
+  ]
  }
 ]
