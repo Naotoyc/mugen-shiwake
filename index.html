@@ -33,10 +33,12 @@
   <link rel="manifest" href="site.webmanifest">
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y078QDMH2J"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
+    // localhost・127.0.0.1・file: のプレビューでは GA4 を読み込まない（本番の集計に混ざるのを防ぐ）
+    var __mugenMeasure = location.protocol !== 'file:' && !/^(localhost|127\.0\.0\.1|\[::1\]|0\.0\.0\.0)$/.test(location.hostname);
+    if (__mugenMeasure) { var __ga = document.createElement('script'); __ga.async = true; __ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-Y078QDMH2J'; document.head.appendChild(__ga); }
     // 内部アクセス除外: 一度 ?internal=1 で開いた端末は以後 traffic_type=internal を送る（?internal=0 で解除）
     (function () {
       try {
