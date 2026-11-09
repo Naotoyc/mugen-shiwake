@@ -1,0 +1,55 @@
+name: x-post
+
+# tools/x_queue.json の予約投稿を、毎朝1本だけ @papatoishi に投稿する。
+# 07:20 JST = 22:20 UTC。GitHub の schedule は遅れることがあるが、1日1本の判定なので二重には出ない。
+# 必要な Secrets:
+#   X_API_KEY / X_API_SECRET              developer.x.com のアプリ（note-autopost と同じアプリで可）
+#   X_ACCESS_TOKEN / X_ACCESS_TOKEN_SECRET @papatoishi のトークン（tools/x_authorize.py で取得）
+
+on:
+  schedule:
+    - cron: "20 22 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "true なら投稿せず本文の確認だけ"
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: x-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Post next queued item
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python tools/x_post_queue.py --dry-run
+          else
+            python tools/x_post_queue.py
+          fi
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          TZ: Asia/Tokyo
+      - name: Commit queue
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/x_queue.json
+          git diff --cached --quiet && echo "変更なし" && exit 0
+          git commit -m "x-post: $(date +%F) の投稿を記録 [skip ci]"
+          git pull --rebase origin main
+          git push
