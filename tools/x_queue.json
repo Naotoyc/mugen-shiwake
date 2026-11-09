@@ -2,85 +2,61 @@
  {
   "id": "00-導入",
   "date": "2026-11-11",
-  "text": "簿記3級に9回落ちました。恥ずかしくて1年半、誰にも言えませんでした。\n不合格9回分の点数を全部並べたら、落ちている場所は3か所しかありませんでした。全体的な勉強不足ではなかったです。\n点数と原因を隠さず書きました。\nhttps://minitoishi.com/boki3-accounting-fail-9times/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "簿記3級に9回落ちました。恥ずかしくて1年半、誰にも言えませんでした。\n不合格9回分の点数を全部並べたら、落ちている場所は3か所しかありませんでした。全体的な勉強不足ではなかったです。\n点数と原因を隠さず書きました。\nhttps://minitoishi.com/boki3-accounting-fail-9times/\n#簿記3級"
  },
  {
   "id": "01-売掛金",
   "date": "2026-11-12",
-  "text": "売掛金は「売ったのにまだお金をもらっていない権利」です。売ったときは借方、回収したときは貸方に書きます。\nこの1行が頭に入ると、掛け取引の仕訳は迷いません。例題10問と練習アプリはこちらです。\nhttps://naotoyc.github.io/mugen-shiwake/topics/urikakekin/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "売掛金は「売ったのにまだお金をもらっていない権利」です。売ったときは借方、回収したときは貸方に書きます。\nこの1行が頭に入ると、掛け取引の仕訳は迷いません。例題10問と練習アプリはこちらです。\nhttps://naotoyc.github.io/mugen-shiwake/topics/urikakekin/\n#簿記3級"
  },
  {
   "id": "02-消費税",
   "date": "2026-11-13",
-  "text": "簿記3級の消費税は税抜処理です。仕入れたら仮払消費税、売ったら仮受消費税、決算で両方を相殺して未払消費税にします。\n3つの科目の役割を分けて覚えると、決算整理で手が止まりません。\nhttps://naotoyc.github.io/mugen-shiwake/topics/shohizei/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "簿記3級の消費税は税抜処理です。仕入れたら仮払消費税、売ったら仮受消費税、決算で両方を相殺して未払消費税にします。\n3つの科目の役割を分けて覚えると、決算整理で手が止まりません。\nhttps://naotoyc.github.io/mugen-shiwake/topics/shohizei/\n#簿記3級"
  },
  {
   "id": "03-売上",
   "date": "2026-11-14",
-  "text": "売上は必ず貸方です。変わるのは借方で、現金で受け取れば現金、掛けなら売掛金、手付金を充てれば前受金になります。\n値引きと返品は売上を借方に書いて取り消します。\nhttps://naotoyc.github.io/mugen-shiwake/topics/uriage/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "売上は必ず貸方です。変わるのは借方で、現金で受け取れば現金、掛けなら売掛金、手付金を充てれば前受金になります。\n値引きと返品は売上を借方に書いて取り消します。\nhttps://naotoyc.github.io/mugen-shiwake/topics/uriage/\n#簿記3級"
  },
  {
   "id": "04-減価償却費",
   "date": "2026-11-15",
-  "text": "減価償却費で落ちる人は、月割りで落ちています。期中に買った備品は、使った月数分だけ費用にします。\n定額法の式と、間接法と直接法の違いを例題10問で確認できます。\nhttps://naotoyc.github.io/mugen-shiwake/topics/genka-shokyakuhi/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "減価償却費で落ちる人は、月割りで落ちています。期中に買った備品は、使った月数分だけ費用にします。\n定額法の式と、間接法と直接法の違いを例題10問で確認できます。\nhttps://naotoyc.github.io/mugen-shiwake/topics/genka-shokyakuhi/\n#簿記3級"
  },
  {
   "id": "05-前受金",
   "date": "2026-11-16",
-  "text": "前受金は「商品を渡す前にもらった手付金」で、負債です。もらったときは貸方、商品を渡したときに借方に書いて売上に振り替えます。\n売掛金と向きが逆になるので、セットで練習すると定着します。\nhttps://naotoyc.github.io/mugen-shiwake/topics/maeukekin/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "前受金は「商品を渡す前にもらった手付金」で、負債です。もらったときは貸方、商品を渡したときに借方に書いて売上に振り替えます。\n売掛金と向きが逆になるので、セットで練習すると定着します。\nhttps://naotoyc.github.io/mugen-shiwake/topics/maeukekin/\n#簿記3級"
  },
  {
   "id": "11-合格報告",
   "date": "2026-11-17",
-  "text": "簿記3級、10回目で合格しました。80点です。\n9回目の4日後に受けました。間を空けずに受けた回が一番伸びました。\n第2問13点は10回で初めての10点超えです。9回分の不合格と10回目の作戦を書いた記事に、結果を追記しました。\nhttps://minitoishi.com/boki3-accounting-fail-9times/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "簿記3級、10回目で合格しました。80点です。\n9回目の4日後に受けました。間を空けずに受けた回が一番伸びました。\n第2問13点は10回で初めての10点超えです。9回分の不合格と10回目の作戦を書いた記事に、結果を追記しました。\nhttps://minitoishi.com/boki3-accounting-fail-9times/\n#簿記3級"
  },
  {
   "id": "06-立替金",
   "date": "2026-11-18",
-  "text": "立替金は「本来は他人が払うお金を会社が代わりに払った」ときの資産です。従業員の生命保険料や、先方負担の発送費が典型です。\n立て替えたときは借方、回収したときは貸方に書きます。\nhttps://naotoyc.github.io/mugen-shiwake/topics/tatekaekin/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "立替金は「本来は他人が払うお金を会社が代わりに払った」ときの資産です。従業員の生命保険料や、先方負担の発送費が典型です。\n立て替えたときは借方、回収したときは貸方に書きます。\nhttps://naotoyc.github.io/mugen-shiwake/topics/tatekaekin/\n#簿記3級"
  },
  {
   "id": "07-現金過不足",
   "date": "2026-11-19",
-  "text": "現金過不足は、帳簿と実際の現金が合わないときの一時的な置き場です。原則は「実際の現金に帳簿を合わせる」です。\n決算まで原因が分からなければ雑損か雑益にします。\nhttps://naotoyc.github.io/mugen-shiwake/topics/genkin-kafusoku/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "現金過不足は、帳簿と実際の現金が合わないときの一時的な置き場です。原則は「実際の現金に帳簿を合わせる」です。\n決算まで原因が分からなければ雑損か雑益にします。\nhttps://naotoyc.github.io/mugen-shiwake/topics/genkin-kafusoku/\n#簿記3級"
  },
  {
   "id": "08-未払金",
   "date": "2026-11-20",
-  "text": "未払金と買掛金の違いは「商品かどうか」だけです。商品の仕入代金なら買掛金、備品や広告費など商品以外なら未払金です。\nこの区別が付くと第1問の失点が1つ減ります。\nhttps://naotoyc.github.io/mugen-shiwake/topics/miharaikin/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "未払金と買掛金の違いは「商品かどうか」だけです。商品の仕入代金なら買掛金、備品や広告費など商品以外なら未払金です。\nこの区別が付くと第1問の失点が1つ減ります。\nhttps://naotoyc.github.io/mugen-shiwake/topics/miharaikin/\n#簿記3級"
  },
  {
   "id": "09-買掛金",
   "date": "2026-11-21",
-  "text": "買掛金は「商品を掛けで仕入れて、まだ払っていない代金」で、負債です。仕入れたときは貸方、支払ったときは借方に書きます。\n売掛金の鏡写しなので、2つを交互に解くと混ざらなくなります。\nhttps://naotoyc.github.io/mugen-shiwake/topics/kaikakekin/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "買掛金は「商品を掛けで仕入れて、まだ払っていない代金」で、負債です。仕入れたときは貸方、支払ったときは借方に書きます。\n売掛金の鏡写しなので、2つを交互に解くと混ざらなくなります。\nhttps://naotoyc.github.io/mugen-shiwake/topics/kaikakekin/\n#簿記3級"
  },
  {
   "id": "10-仮払金",
   "date": "2026-11-22",
-  "text": "仮払金は「出張費など、金額が決まる前に概算で渡したお金」で、資産です。渡したときは借方、精算したときに貸方に書いて旅費交通費などに振り替えます。\n余りが現金で戻るパターンが頻出です。\nhttps://naotoyc.github.io/mugen-shiwake/topics/karibaraikin/\n#簿記3級",
-  "posted_at": null,
-  "tweet_id": null
+  "text": "仮払金は「出張費など、金額が決まる前に概算で渡したお金」で、資産です。渡したときは借方、精算したときに貸方に書いて旅費交通費などに振り替えます。\n余りが現金で戻るパターンが頻出です。\nhttps://naotoyc.github.io/mugen-shiwake/topics/karibaraikin/\n#簿記3級"
  }
 ]

@@ -560,7 +560,25 @@ def period_table_md(title: str, rows: list[dict]) -> list[str]:
     return L
 
 
-def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashboard_url: str = "", notes: list[list[str]] | None = None, periods: dict | None = None) -> dict:
+def x_today(today: date, queue_path: str) -> dict | None:
+    """tools/x_queue.json から今日の予約文を返す。無ければ None。投稿は人が行う（X API は使わない）。"""
+    import json
+    path = Path(queue_path)
+    if not path.exists():
+        return None
+    for item in json.loads(path.read_text(encoding="utf-8")):
+        if item.get("date") == today.isoformat():
+            return item
+    return None
+
+
+def x_intent_url(text: str) -> str:
+    """X の投稿画面を本文入りで開くリンク（0円方式。API 課金なし）。"""
+    from urllib.parse import quote
+    return "https://x.com/intent/post?text=" + quote(text, safe="")
+
+
+def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashboard_url: str = "", notes: list[list[str]] | None = None, periods: dict | None = None, x_item: dict | None = None) -> dict:
     """Slack Incoming Webhook 用 payload（blocks）。数字は「今週 → 前週比」で揃える。"""
     (gs, ge), _ = ga_rng
     ev_c, ev_p = ga_cur["events"], ga_prev["events"]
@@ -604,6 +622,13 @@ def render_slack(today: date, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, dashbo
         blocks.append({"type": "divider"})
         blocks.append({"type": "section", "text": {"type": "mrkdwn", "text": "*月ごと・四半期ごとの推移（内部を除く）*"},})
         blocks.append({"type": "section", "fields": [{"type": "mrkdwn", "text": f} for f in pfields]})
+    if x_item:
+        blocks.append({"type": "divider"})
+        blocks.append({"type": "section", "text": {"type": "mrkdwn",
+                       "text": f"*今日の X 投稿（@papatoishi、{x_item['id']}）*\nボタンを押すと本文が入った投稿画面が開くので、確認して「ポスト」を押してください。\n```{x_item['text']}```"}})
+        blocks.append({"type": "actions", "elements": [{
+            "type": "button", "text": {"type": "plain_text", "text": "X の投稿画面を開きます"},
+            "url": x_intent_url(x_item["text"])}]})
     if dashboard_url:
         blocks.append({"type": "actions", "elements": [{
             "type": "button", "text": {"type": "plain_text", "text": "ダッシュボードを開きます"},
@@ -690,6 +715,7 @@ def main() -> int:
     ap.add_argument("--replace", action="store_true", help="同日のブロックが既にあれば差し替える（権限追加後の再実行用）")
     ap.add_argument("--history", help="ダッシュボード用 history.json のパス。当日分を upsert する")
     ap.add_argument("--dashboard-url", default=os.environ.get("DASHBOARD_URL", ""), help="Slack のボタンから開くURL")
+    ap.add_argument("--x-queue", help="X の予約文 JSON（tools/x_queue.json）。今日の分があれば Slack に投稿画面を開くボタンを付ける")
     args = ap.parse_args()
 
     if args.env_file:
@@ -744,7 +770,8 @@ def main() -> int:
     if args.slack and not written:
         print("同日ブロックをスキップしたので Slack 送信も省略")
     elif args.slack:
-        post_slack(render_slack(today, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, args.dashboard_url, notes, periods))
+        x_item = x_today(today, args.x_queue) if args.x_queue else None
+        post_slack(render_slack(today, ga_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, args.dashboard_url, notes, periods, x_item))
     return 0
 
 
