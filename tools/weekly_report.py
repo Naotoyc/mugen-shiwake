@@ -41,6 +41,48 @@ def week_ranges(ga_end: date, gsc_end: date):
 
 
 # ---------------------------------------------------------------- GA4
+BOT_KEYS = ("sessions", "pv", "users", "new_users")
+
+
+def ga4_bots(client, prop: str, dr, lead_dim: str | None = None) -> dict[str, dict]:
+    """機械的なアクセスとみなす分の件数を返す。キーは lead_dim の値（なければ ""）。
+
+    3条件がすべて重なる行だけを機械とみなす（2026-11-16 ユーザー決定）。
+    国が日本以外、参照元が (direct)、滞在時間の合計が 0秒。
+    滞在 0秒だけ、参照元が直接だけでは人間も当てはまるので、単独では使わない。
+    国が (not set) の行は判定できないので除外しない。内部アクセスの行は別に除外済みなので数えない。
+    """
+    from google.analytics.data_v1beta.types import Dimension, Metric, RunReportRequest
+    dims = ([lead_dim] if lead_dim else []) + [
+        "testDataFilterName", "country", "city", "sessionSource", "deviceCategory", "operatingSystem", "browser"]
+    resp = client.run_report(RunReportRequest(
+        property=prop, date_ranges=dr,
+        dimensions=[Dimension(name=d) for d in dims],
+        metrics=[Metric(name="sessions"), Metric(name="screenPageViews"), Metric(name="activeUsers"),
+                 Metric(name="newUsers"), Metric(name="userEngagementDuration")], limit=10000,
+    ))
+    out: dict[str, dict] = {}
+    for r in resp.rows:
+        v = [x.value for x in r.dimension_values]
+        key = v.pop(0) if lead_dim else ""
+        filt, country, _city, source = v[0], v[1], v[2], v[3]
+        if "internal" in filt.lower():
+            continue
+        if country in ("Japan", "(not set)", "") or source != "(direct)":
+            continue
+        if float(r.metric_values[4].value) > 0:
+            continue
+        row = out.setdefault(key, dict.fromkeys(BOT_KEYS, 0))
+        for k, m in zip(BOT_KEYS, r.metric_values[:4]):
+            row[k] += int(m.value)
+    return out
+
+
+def subtract_bots(ext: dict, bots: dict, suffix: str = "") -> None:
+    for k in BOT_KEYS:
+        ext[k + suffix] = max(0, ext.get(k + suffix, 0) - bots.get(k, 0))
+
+
 def ga4_fetch(property_id: str, sa_path: str, start: date, end: date) -> dict:
     from google.analytics.data_v1beta import BetaAnalyticsDataClient
     from google.analytics.data_v1beta.types import (
@@ -89,7 +131,12 @@ def ga4_fetch(property_id: str, sa_path: str, start: date, end: date) -> dict:
     for r in resp.rows:
         events[r.dimension_values[0].value] = int(r.metric_values[0].value)
 
-    return {"total": total, "ext": ext, "events": events}
+    # 3) 機械的なアクセスを、全体と内部除外の両方から引く（内部の割合の計算を崩さないため）
+    bots = ga4_bots(client, prop, dr).get("", dict.fromkeys(BOT_KEYS, 0))
+    subtract_bots(total, bots)
+    subtract_bots(ext, bots)
+
+    return {"total": total, "ext": ext, "events": events, "bots": bots}
 
 
 def ga4_daily(property_id: str, sa_path: str, start: date, end: date) -> list[dict]:
@@ -115,6 +162,12 @@ def ga4_daily(property_id: str, sa_path: str, start: date, end: date) -> list[di
         row = by.setdefault(iso, {"date": iso, "new_users_ext": 0, "users_ext": 0})
         row["new_users_ext"] += int(r.metric_values[0].value)
         row["users_ext"] += int(r.metric_values[1].value)
+    for d8, b in ga4_bots(client, f"properties/{property_id}",
+                          [DateRange(start_date=start.isoformat(), end_date=end.isoformat())], "date").items():
+        row = by.get(f"{d8[:4]}-{d8[4:6]}-{d8[6:]}")
+        if row:
+            row["new_users_ext"] = max(0, row["new_users_ext"] - b["new_users"])
+            row["users_ext"] = max(0, row["users_ext"] - b["users"])
     days = []
     d = start
     while d <= end:
@@ -219,6 +272,9 @@ def ga4_by_month(property_id: str, sa_path: str, start: date, end: date) -> dict
     ))
     for r in resp.rows:
         row_for(r.dimension_values[0].value)[r.dimension_values[1].value] += int(r.metric_values[0].value)
+    for ym, b in ga4_bots(client, prop, dr, "yearMonth").items():
+        subtract_bots(row_for(ym), b)
+        subtract_bots(row_for(ym), b, "_ext")
     return by
 
 
@@ -358,6 +414,15 @@ def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None, da
                 ["内部として記録されたアクセスが 0 だったからです。"],
                 [],
                 "自分が使う端末すべてで ?internal=1 を一度開くべきです。"))
+
+    # 2b) 機械的なアクセスの除外（人数を明示する）
+    bots = ga_cur.get("bots") or {}
+    if bots.get("users"):
+        out.append(prep(
+            "機械的なアクセスを訪問者数から除外しました。",
+            [f"国が日本以外、参照元が直接、滞在 0秒の3条件が重なるアクセスが {bots['users']}人分（ページ表示 {bots['pv']}回）あったからです。"],
+            [],
+            "この報告の訪問者数は、除外した後の人数として読んでください。"))
 
     # 3) 教材カード
     ev, evp = ga_cur["events"], ga_prev["events"]
@@ -668,6 +733,7 @@ def snapshot(today: date, ga_rng, gsc_rng, ga_cur, ga_prev, gsc_cur, gsc_prev, n
             "pv": ga["total"]["pv"], "pv_ext": ga["ext"]["pv"],
             "users": ga["total"]["users"], "users_ext": ga["ext"]["users"],
             "new_users": ga["total"]["new_users"], "new_users_ext": ga["ext"]["new_users"],
+            "bot_users": (ga.get("bots") or {}).get("users", 0), "bot_pv": (ga.get("bots") or {}).get("pv", 0),
             **{e: ga["events"][e] for e in EVENTS},
             "gsc_impressions": gsc["impressions"], "gsc_clicks": gsc["clicks"],
         }
