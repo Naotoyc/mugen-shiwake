@@ -62,6 +62,11 @@ def ga4_bots(client, prop: str, dr, lead_dim: str | None = None) -> dict[str, di
                  Metric(name="newUsers"), Metric(name="userEngagementDuration")], limit=10000,
     ))
     out: dict[str, dict] = {}
+    groups: set[tuple] = set()   # 機械とみなした行（期間キー＋国、都市、参照元、端末、OS、ブラウザ）
+
+    def blank() -> dict:
+        return {**dict.fromkeys(BOT_KEYS, 0), **{e: 0 for e in EVENTS}}
+
     for r in resp.rows:
         v = [x.value for x in r.dimension_values]
         key = v.pop(0) if lead_dim else ""
@@ -72,10 +77,36 @@ def ga4_bots(client, prop: str, dr, lead_dim: str | None = None) -> dict[str, di
             continue
         if float(r.metric_values[4].value) > 0:
             continue
-        row = out.setdefault(key, dict.fromkeys(BOT_KEYS, 0))
+        groups.add((key, *v[1:]))
+        row = out.setdefault(key, blank())
         for k, m in zip(BOT_KEYS, r.metric_values[:4]):
             row[k] += int(m.value)
+    if not groups:
+        return out
+
+    # 同じ行が出したイベント（教材カードの表示など）も数える。
+    # 滞在時間はイベント名で分けると 0 になるので、機械の判定は上の結果だけを使う。
+    from google.analytics.data_v1beta.types import Filter, FilterExpression, FilterExpressionList
+    resp = client.run_report(RunReportRequest(
+        property=prop, date_ranges=dr,
+        dimensions=[Dimension(name=d) for d in dims + ["eventName"]],
+        metrics=[Metric(name="eventCount")], limit=10000,
+        dimension_filter=FilterExpression(or_group=FilterExpressionList(expressions=[
+            FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value=e)))
+            for e in EVENTS])),
+    ))
+    for r in resp.rows:
+        v = [x.value for x in r.dimension_values]
+        key = v.pop(0) if lead_dim else ""
+        if "internal" in v[0].lower() or (key, *v[1:-1]) not in groups:
+            continue
+        out.setdefault(key, blank())[v[-1]] += int(r.metric_values[0].value)
     return out
+
+
+def subtract_bot_events(events: dict, bots: dict) -> None:
+    for e in EVENTS:
+        events[e] = max(0, events.get(e, 0) - bots.get(e, 0))
 
 
 def subtract_bots(ext: dict, bots: dict, suffix: str = "") -> None:
@@ -135,6 +166,7 @@ def ga4_fetch(property_id: str, sa_path: str, start: date, end: date) -> dict:
     bots = ga4_bots(client, prop, dr).get("", dict.fromkeys(BOT_KEYS, 0))
     subtract_bots(total, bots)
     subtract_bots(ext, bots)
+    subtract_bot_events(events, bots)
 
     return {"total": total, "ext": ext, "events": events, "bots": bots}
 
@@ -275,6 +307,7 @@ def ga4_by_month(property_id: str, sa_path: str, start: date, end: date) -> dict
     for ym, b in ga4_bots(client, prop, dr, "yearMonth").items():
         subtract_bots(row_for(ym), b)
         subtract_bots(row_for(ym), b, "_ext")
+        subtract_bot_events(row_for(ym), b)
     return by
 
 
@@ -421,7 +454,7 @@ def analyze(ga_cur, ga_prev, gsc_cur, gsc_prev, week_ago: dict | None = None, da
         out.append(prep(
             "機械的なアクセスを訪問者数から除外しました。",
             [f"国が日本以外、参照元が直接、滞在 0秒の3条件が重なるアクセスが {bots['users']}人分（ページ表示 {bots['pv']}回）あったからです。"],
-            [],
+            [f"同じアクセスによる教材カードの表示 {bots.get('affiliate_view', 0)}回も、表示回数から除外しました。"] if bots.get("affiliate_view") else [],
             "この報告の訪問者数は、除外した後の人数として読んでください。"))
 
     # 3) 教材カード
