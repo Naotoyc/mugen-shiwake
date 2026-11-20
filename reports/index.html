@@ -59,26 +59,22 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
 <h2>今日の所見</h2>
 <div class="card notes" id="notes"></div>
 
+<h2>4つの段階（直近7日間と、その前の7日間の比較）</h2>
+<div class="grid" id="kpi-funnel"></div>
+<p class="note">人は「Google 検索に表示される」「サイトを訪問する」「教材カードを見る」「教材カードを押す」の順に減っていきます。上の段階から順に見て、最初に基準に届いていない段階が、今週の詰まりです。今週の詰まりより後の段階の数字は、まだ判断に使いません。4つの数字は、内部のアクセスと機械的なアクセスを除いた値です。</p>
+
 <h2>初めて訪問した人数（1日ごと、内部を除く、直近28日）</h2>
 <div class="card" id="daily-card"><div id="daily"></div><p class="note">その日に初めてサイトを訪問した人数です。?internal=1 を設定した自分の端末は含みません。この棒が日を追って高くなっていなければ、サイトは伸びていません。</p></div>
 
-<h2>月ごとの推移（内部を除く）</h2>
+<h2>月ごとの推移（内部と機械的なアクセスを除く）</h2>
 <div class="grid2" id="monthly-charts"></div>
 <div class="card" style="margin-top:12px"><table id="tbl-m"></table></div>
 <p class="note">月ごとの合計です。今月は途中までの値で、Search Console は直近3日分が反映前です。週ごとの比較では見えない長期の伸びを、この表で確認します。</p>
 
-<h2>四半期ごとの推移（内部を除く）</h2>
+<h2>四半期ごとの推移（内部と機械的なアクセスを除く）</h2>
 <div class="card"><table id="tbl-q4"></table></div>
 <p class="note">四半期ごとの合計です。訪問した人数は四半期内の重複を除いた人数なので、月ごとの人数を足した値とは一致しません。</p>
 
-<h2>訪問（直近7日間と、その前の7日間の比較）</h2>
-<div class="grid" id="kpi-access"></div>
-
-<h2>教材カードと、論点ページからアプリへの移動</h2>
-<div class="grid" id="kpi-aff"></div>
-
-<h2>Google 検索での表示とクリック（Search Console）</h2>
-<div class="grid" id="kpi-gsc"></div>
 <p class="note" id="gsc-note"></p>
 
 <h2>Google 検索で表示回数が多かった検索語（上位5件）</h2>
@@ -183,9 +179,8 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
     });
     el.innerHTML = svg + '</svg>';
   }
-  const PERIOD_COLS = [['訪問した人数','users_ext'],['初めて訪問した人数','new_users_ext'],['訪問回数','sessions_ext'],
-    ['ページが表示された回数','pv_ext'],['教材カードが表示された回数','affiliate_view'],['教材カードがクリックされた回数','affiliate_click'],
-    ['論点ページからアプリへ移動した回数','topic_page_to_app'],['Google 検索に表示された回数','gsc_impressions'],['Google 検索からクリックされた回数','gsc_clicks']];
+  const PERIOD_COLS = [['Google 検索に表示された回数','gsc_impressions'],['訪問した人数','users_ext'],
+    ['教材カードを見た人数','affiliate_viewers'],['教材カードがクリックされた回数','affiliate_click']];
   const periodLabel = r => {
     if (!r.partial) return r.label;
     const [, m, d] = r.end.split('-').map(Number);
@@ -248,15 +243,9 @@ footer{margin-top:32px;font-size:12px;color:var(--text-sub)}footer a{color:var(-
       `<span class="delta ${d.cls}">${d.txt}</span><span class="prev">前週は ${fmtN(p, pct)}</span><div class="chart-slot"></div></div>`;
   }
 
-  $('kpi-access').innerHTML =
-    tile('訪問した人数（内部を除く）', 'users_ext') + tile('初めて訪問した人数（内部を除く）', 'new_users_ext') +
-    tile('訪問回数（内部を除く）', 'sessions_ext') + tile('ページが表示された回数（内部を除く）', 'pv_ext') +
-    tile('訪問した人数（内部を含む）', 'users') + tile('訪問回数（内部を含む）', 'sessions') + tile('ページが表示された回数（内部を含む）', 'pv');
-  $('kpi-aff').innerHTML =
-    tile('教材カードが表示された回数', 'affiliate_view') + tile('教材カードがクリックされた回数', 'affiliate_click') +
-    tile('教材カードのクリック率', 'cvr', true) + tile('論点ページからアプリへ移動した回数', 'topic_page_to_app');
-  $('kpi-gsc').innerHTML =
-    tile('Google 検索に表示された回数', 'gsc_impressions') + tile('Google 検索からクリックされた回数', 'gsc_clicks');
+  $('kpi-funnel').innerHTML =
+    tile('1. Google 検索に表示された回数（基準は週 100回）', 'gsc_impressions') + tile('2. 訪問した人数（基準は週 30人）', 'users_ext') +
+    tile('3. 教材カードを見た人数（基準は週 30人）', 'affiliate_viewers') + tile('4. 教材カードがクリックされた回数（基準は週 1回）', 'affiliate_click');
   $('notes').innerHTML = (last.notes && last.notes.length)
     ? last.notes.map(n => '<div class="item">' + esc(n) + '</div>').join('')
     : '<p class="empty">所見はまだありません。次回の更新から表示されます。</p>';
