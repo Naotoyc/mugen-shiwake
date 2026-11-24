@@ -9733,5 +9733,492 @@
    "gsc_error": false,
    "end": "2026-11-22"
   }
+ },
+ {
+  "date": "2026-11-24",
+  "ga_range": [
+   "2026-11-17",
+   "2026-11-23"
+  ],
+  "gsc_range": [
+   "2026-11-15",
+   "2026-11-21"
+  ],
+  "cur": {
+   "sessions": 12,
+   "sessions_ext": 12,
+   "pv": 31,
+   "pv_ext": 31,
+   "users": 10,
+   "users_ext": 10,
+   "new_users": 10,
+   "new_users_ext": 10,
+   "bot_users": 0,
+   "bot_pv": 0,
+   "affiliate_view": 93,
+   "affiliate_click": 0,
+   "topic_page_to_app": 2,
+   "affiliate_viewers": 4,
+   "gsc_impressions": 130,
+   "gsc_clicks": 1
+  },
+  "prev": {
+   "sessions": 9,
+   "sessions_ext": 9,
+   "pv": 12,
+   "pv_ext": 12,
+   "users": 8,
+   "users_ext": 8,
+   "new_users": 8,
+   "new_users_ext": 8,
+   "bot_users": 109,
+   "bot_pv": 109,
+   "affiliate_view": 15,
+   "affiliate_click": 0,
+   "topic_page_to_app": 1,
+   "affiliate_viewers": 4,
+   "gsc_impressions": 18,
+   "gsc_clicks": 0
+  },
+  "queries": [
+   {
+    "key": "site:github.io",
+    "impressions": 5,
+    "clicks": 0,
+    "position": 30.8
+   },
+   {
+    "key": "損益振替",
+    "impressions": 3,
+    "clicks": 0,
+    "position": 4.666666666666666
+   },
+   {
+    "key": "立替 払い 仕訳",
+    "impressions": 2,
+    "clicks": 0,
+    "position": 75
+   },
+   {
+    "key": "簿記当座預金",
+    "impressions": 2,
+    "clicks": 0,
+    "position": 28
+   },
+   {
+    "key": "戻し入れとは",
+    "impressions": 1,
+    "clicks": 0,
+    "position": 29
+   }
+  ],
+  "pages": [
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/shiharai-yachin/",
+    "impressions": 19,
+    "clicks": 0,
+    "position": 8.157894736842106
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/toza-yokin/",
+    "impressions": 15,
+    "clicks": 0,
+    "position": 10.133333333333333
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/soneki-furikae/",
+    "impressions": 13,
+    "clicks": 0,
+    "position": 12.538461538461538
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/kariukekin/",
+    "impressions": 10,
+    "clicks": 0,
+    "position": 7.4
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/maeukekin/",
+    "impressions": 9,
+    "clicks": 0,
+    "position": 12.333333333333334
+   }
+  ],
+  "gsc_error": false,
+  "notes": [
+   "・今週の詰まりは、「サイトを訪問する」の段階です。\n　理由は、訪問した人数が 10人で、基準の 30人に届いていないからです。\n\n　具体的には、4つの数字は、Google 検索に表示された回数 130回（前週は 18回）、訪問した人数 10人（前週は 8人）、教材カードを見た人数 4人（前週は 4人）、教材カードがクリックされた回数 0回（前週は 0回）でした。\n　Google 検索で表示が多い検索語は「損益振替、立替 払い 仕訳、簿記当座預金」です。\n\n　そのため、表示が多い検索語の論点ページの題名と説明文を見直すべきです。",
+   "・教材カードの表示回数は、少ない人数による回数です。\n　理由は、教材カードの表示 93回が、4人によるものだからです。\n\n　そのため、教材カードは、表示回数ではなく、教材カードを見た人数で判断します。",
+   "・自分の端末のアクセスが集計に入っている可能性が高いです。\n　理由は、内部として記録されたアクセスが 0 だったからです。\n\n　そのため、自分が使う端末すべてで ?internal=1 を一度開くべきです。"
+  ],
+  "daily": [
+   {
+    "date": "2026-10-27",
+    "new_users_ext": 0,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-28",
+    "new_users_ext": 2,
+    "users_ext": 4
+   },
+   {
+    "date": "2026-10-29",
+    "new_users_ext": 0,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-10-30",
+    "new_users_ext": 3,
+    "users_ext": 5
+   },
+   {
+    "date": "2026-10-31",
+    "new_users_ext": 1,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-11-01",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-02",
+    "new_users_ext": 0,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-11-03",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-04",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-05",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-06",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-07",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-08",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-09",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-10",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-11",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-12",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-13",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-14",
+    "new_users_ext": 3,
+    "users_ext": 3
+   },
+   {
+    "date": "2026-11-15",
+    "new_users_ext": 5,
+    "users_ext": 5
+   },
+   {
+    "date": "2026-11-16",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-17",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-18",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-19",
+    "new_users_ext": 4,
+    "users_ext": 4
+   },
+   {
+    "date": "2026-11-20",
+    "new_users_ext": 4,
+    "users_ext": 4
+   },
+   {
+    "date": "2026-11-21",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-22",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-11-23",
+    "new_users_ext": 1,
+    "users_ext": 1
+   }
+  ],
+  "periods": {
+   "monthly": [
+    {
+     "sessions": 82,
+     "sessions_ext": 82,
+     "pv": 89,
+     "pv_ext": 89,
+     "users": 64,
+     "users_ext": 64,
+     "new_users": 64,
+     "new_users_ext": 64,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 2,
+     "gsc_clicks": 0,
+     "key": "2026-05",
+     "label": "2026年5月",
+     "start": "2026-05-01",
+     "end": "2026-05-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 0,
+     "sessions_ext": 0,
+     "pv": 109,
+     "pv_ext": 109,
+     "users": 0,
+     "users_ext": 0,
+     "new_users": 2,
+     "new_users_ext": 2,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 1,
+     "gsc_clicks": 0,
+     "key": "2026-06",
+     "label": "2026年6月",
+     "start": "2026-06-01",
+     "end": "2026-06-30",
+     "days": 30,
+     "partial": false
+    },
+    {
+     "sessions": 5,
+     "sessions_ext": 5,
+     "pv": 5,
+     "pv_ext": 5,
+     "users": 5,
+     "users_ext": 5,
+     "new_users": 3,
+     "new_users_ext": 3,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-07",
+     "label": "2026年7月",
+     "start": "2026-07-01",
+     "end": "2026-07-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 2,
+     "sessions_ext": 2,
+     "pv": 2,
+     "pv_ext": 2,
+     "users": 2,
+     "users_ext": 2,
+     "new_users": 1,
+     "new_users_ext": 1,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-08",
+     "label": "2026年8月",
+     "start": "2026-08-01",
+     "end": "2026-08-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 7,
+     "sessions_ext": 7,
+     "pv": 10,
+     "pv_ext": 10,
+     "users": 6,
+     "users_ext": 6,
+     "new_users": 5,
+     "new_users_ext": 5,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-09",
+     "label": "2026年9月",
+     "start": "2026-09-01",
+     "end": "2026-09-30",
+     "days": 30,
+     "partial": false
+    },
+    {
+     "sessions": 38,
+     "sessions_ext": 37,
+     "pv": 119,
+     "pv_ext": 117,
+     "users": 13,
+     "users_ext": 12,
+     "new_users": 9,
+     "new_users_ext": 9,
+     "affiliate_view": 28,
+     "affiliate_click": 0,
+     "topic_page_to_app": 3,
+     "affiliate_viewers": 6,
+     "gsc_impressions": 1,
+     "gsc_clicks": 0,
+     "key": "2026-10",
+     "label": "2026年10月",
+     "start": "2026-10-01",
+     "end": "2026-10-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 25,
+     "sessions_ext": 25,
+     "pv": 53,
+     "pv_ext": 53,
+     "users": 19,
+     "users_ext": 19,
+     "new_users": 18,
+     "new_users_ext": 18,
+     "affiliate_view": 116,
+     "affiliate_click": 0,
+     "topic_page_to_app": 3,
+     "affiliate_viewers": 10,
+     "gsc_impressions": 149,
+     "gsc_clicks": 1,
+     "key": "2026-11",
+     "label": "2026年11月",
+     "start": "2026-11-01",
+     "end": "2026-11-23",
+     "days": 23,
+     "partial": true
+    }
+   ],
+   "quarterly": [
+    {
+     "sessions": 78,
+     "sessions_ext": 78,
+     "pv": 198,
+     "pv_ext": 198,
+     "users": 51,
+     "users_ext": 51,
+     "new_users": 66,
+     "new_users_ext": 66,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 3,
+     "gsc_clicks": 0,
+     "key": "2026-Q2",
+     "label": "2026年4月から6月",
+     "start": "2026-04-01",
+     "end": "2026-06-30",
+     "days": 91,
+     "partial": false
+    },
+    {
+     "sessions": 14,
+     "sessions_ext": 14,
+     "pv": 17,
+     "pv_ext": 17,
+     "users": 11,
+     "users_ext": 11,
+     "new_users": 9,
+     "new_users_ext": 9,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-Q3",
+     "label": "2026年7月から9月",
+     "start": "2026-07-01",
+     "end": "2026-09-30",
+     "days": 92,
+     "partial": false
+    },
+    {
+     "sessions": 63,
+     "sessions_ext": 62,
+     "pv": 172,
+     "pv_ext": 170,
+     "users": 31,
+     "users_ext": 30,
+     "new_users": 27,
+     "new_users_ext": 27,
+     "affiliate_view": 144,
+     "affiliate_click": 0,
+     "topic_page_to_app": 6,
+     "affiliate_viewers": 15,
+     "gsc_impressions": 150,
+     "gsc_clicks": 1,
+     "key": "2026-Q4",
+     "label": "2026年10月から12月",
+     "start": "2026-10-01",
+     "end": "2026-11-23",
+     "days": 54,
+     "partial": true
+    }
+   ],
+   "gsc_error": false,
+   "end": "2026-11-23"
+  }
  }
 ]
