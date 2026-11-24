@@ -338,13 +338,16 @@ const QUESTION_TEMPLATES = [
   {
     id: 30, topic: '未収入金', tags: ['未収入金', '備品'],
     generate: (a) => ({
-      question: `不用になった備品（帳簿価額${fmt(a)}円）を${fmt(Math.round(a * 1.2))}円で売却し、代金は月末に受け取る予定。`,
-      debit:  [{ account: '未収入金', amount: Math.round(a * 1.2) }],
+      question: `不用になった備品（取得原価${fmt(a * 3)}円、減価償却累計額${fmt(a * 2)}円）を${fmt(Math.round(a * 1.2))}円で売却し、代金は月末に受け取る予定。`,
+      debit:  [
+        { account: '未収入金', amount: Math.round(a * 1.2) },
+        { account: '備品減価償却累計額', amount: a * 2 }
+      ],
       credit: [
-        { account: '備品',          amount: a },
+        { account: '備品',          amount: a * 3 },
         { account: '固定資産売却益', amount: Math.round(a * 0.2) }
       ],
-      explanation: '売却代金は後日受取→未収入金（資産↑）借方。備品（資産↓）と売却益（収益↑）を貸方。'
+      explanation: `帳簿価額は${fmt(a * 3)}円−${fmt(a * 2)}円＝${fmt(a)}円。売却額のほうが高いので差額が固定資産売却益（収益）。代金は後日受け取るので未収入金（資産）を借方、減価償却累計額も借方で取り崩し、備品は取得原価で貸方に消す。`
     })
   },
   {
@@ -359,10 +362,10 @@ const QUESTION_TEMPLATES = [
   {
     id: 32, topic: '未収入金', tags: ['未収入金', '備品'],
     generate: (a) => ({
-      question: `備品（帳簿価額${fmt(a)}円）を帳簿価額と同額で売却し、代金は後日受け取る。`,
-      debit:  [{ account: '未収入金', amount: a }],
-      credit: [{ account: '備品',     amount: a }],
-      explanation: '帳簿価額で売却→損益なし。未収入金（資産↑）借方、備品（資産↓）貸方。'
+      question: `備品（取得原価${fmt(a * 4)}円、減価償却累計額${fmt(a * 3)}円）を${fmt(a)}円で売却し、代金は後日受け取る。`,
+      debit:  [{ account: '未収入金', amount: a }, { account: '備品減価償却累計額', amount: a * 3 }],
+      credit: [{ account: '備品',     amount: a * 4 }],
+      explanation: `帳簿価額は${fmt(a * 4)}円−${fmt(a * 3)}円＝${fmt(a)}円で、売却額と同じなので損益は出ない。未収入金（資産）と減価償却累計額を借方、備品を取得原価で貸方。`
     })
   },
   {
@@ -744,13 +747,14 @@ const QUESTION_TEMPLATES = [
       const sell = Math.round(a * 0.7);
       const loss = a - sell;
       return {
-        question: `帳簿価額${fmt(a)}円の備品を${fmt(sell)}円で売却し、代金は現金で受け取った。`,
+        question: `取得原価${fmt(a * 2)}円、減価償却累計額${fmt(a)}円の備品を${fmt(sell)}円で売却し、代金は現金で受け取った。`,
         debit:  [
           { account: '現金',       amount: sell },
+          { account: '備品減価償却累計額', amount: a },
           { account: '固定資産売却損', amount: loss }
         ],
-        credit: [{ account: '備品', amount: a }],
-        explanation: `帳簿価額（${fmt(a)}円）＞売価（${fmt(sell)}円）→売却損（${fmt(loss)}円）が費用。`
+        credit: [{ account: '備品', amount: a * 2 }],
+        explanation: `帳簿価額は${fmt(a * 2)}円−${fmt(a)}円＝${fmt(a)}円。売却額${fmt(sell)}円のほうが低いので、差額${fmt(loss)}円が固定資産売却損（費用）。減価償却累計額は借方で取り崩し、備品は取得原価で貸方に消す。`
       };
     }
   },
@@ -2119,10 +2123,10 @@ const QUESTION_TEMPLATES = [
     generate: () => {
       const book = (Math.floor(Math.random() * 5) + 1) * 20000;
       return {
-        question: `帳簿価額${fmt(book)}円の備品を${fmt(book)}円で売却し、代金は翌月末に受け取ることにした。`,
-        debit:  [{ account: '未収入金', amount: book }],
-        credit: [{ account: '備品', amount: book }],
-        explanation: `商品以外の物を売った代金の未収は、売掛金ではなく未収入金（資産↑）借方。備品（資産↓）貸方。帳簿価額と同じ金額で売ったので、売却益も売却損も出ない。`
+        question: `取得原価${fmt(book * 3)}円、減価償却累計額${fmt(book * 2)}円の備品を${fmt(book)}円で売却し、代金は翌月末に受け取ることにした。`,
+        debit:  [{ account: '未収入金', amount: book }, { account: '備品減価償却累計額', amount: book * 2 }],
+        credit: [{ account: '備品', amount: book * 3 }],
+        explanation: `商品以外の物を売った代金の未収は、売掛金ではなく未収入金（資産）。帳簿価額は${fmt(book * 3)}円−${fmt(book * 2)}円＝${fmt(book)}円で売却額と同じなので、売却益も売却損も出ない。減価償却累計額は借方で取り崩し、備品は取得原価で貸方に消す。`
       };
     }
   },
@@ -2454,10 +2458,10 @@ const QUESTION_TEMPLATES = [
       const gain = (Math.floor(Math.random() * 3) + 1) * 10000;
       const proc = book + gain;
       return {
-        question: `帳簿価額${fmt(book)}円の備品を${fmt(proc)}円で売却した。代金は翌月受け取り予定。`,
-        debit:  [{ account: '未収入金', amount: proc }],
-        credit: [{ account: '備品', amount: book }, { account: '固定資産売却益', amount: gain }],
-        explanation: `売却代金未収：未収入金（資産↑）借方。備品${fmt(book)}円消去・売却益${fmt(gain)}円（収益↑）貸方。`
+        question: `取得原価${fmt(book * 4)}円、減価償却累計額${fmt(book * 3)}円の備品を${fmt(proc)}円で売却した。代金は翌月受け取り予定。`,
+        debit:  [{ account: '未収入金', amount: proc }, { account: '備品減価償却累計額', amount: book * 3 }],
+        credit: [{ account: '備品', amount: book * 4 }, { account: '固定資産売却益', amount: gain }],
+        explanation: `帳簿価額は${fmt(book * 4)}円−${fmt(book * 3)}円＝${fmt(book)}円。売却額${fmt(proc)}円との差額${fmt(gain)}円が固定資産売却益（収益）。代金は未収入金（資産）、減価償却累計額は借方で取り崩し、備品は取得原価で貸方。`
       };
     }
   },
@@ -2862,10 +2866,10 @@ const QUESTION_TEMPLATES = [
       const gain = (Math.floor(Math.random() * 5) + 1) * 10000;
       const proceeds = book + gain;
       return {
-        question: `帳簿価額${fmt(book)}円の備品を${fmt(proceeds)}円で売却し、代金を現金で受け取った。`,
-        debit:  [{ account: '現金', amount: proceeds }],
-        credit: [{ account: '備品', amount: book }, { account: '固定資産売却益', amount: gain }],
-        explanation: `売却額${fmt(proceeds)}円＞帳簿価額${fmt(book)}円→差額${fmt(gain)}円が固定資産売却益（収益↑）。現金（資産↑）借方、備品（資産↓）・固定資産売却益貸方。`
+        question: `取得原価${fmt(book * 2)}円、減価償却累計額${fmt(book)}円の備品を${fmt(proceeds)}円で売却し、代金を現金で受け取った。`,
+        debit:  [{ account: '現金', amount: proceeds }, { account: '備品減価償却累計額', amount: book }],
+        credit: [{ account: '備品', amount: book * 2 }, { account: '固定資産売却益', amount: gain }],
+        explanation: `帳簿価額は${fmt(book * 2)}円−${fmt(book)}円＝${fmt(book)}円。売却額${fmt(proceeds)}円との差額${fmt(gain)}円が固定資産売却益（収益）。減価償却累計額は借方で取り崩し、備品は取得原価で貸方に消す。`
       };
     }
   },
@@ -2877,10 +2881,10 @@ const QUESTION_TEMPLATES = [
       const gain = (Math.floor(Math.random() * 5) + 1) * 10000;
       const proceeds = book + gain;
       return {
-        question: `帳簿価額${fmt(book)}円の備品を${fmt(proceeds)}円で売却し、代金が普通預金に振り込まれた。`,
-        debit:  [{ account: '普通預金', amount: proceeds }],
-        credit: [{ account: '備品', amount: book }, { account: '固定資産売却益', amount: gain }],
-        explanation: `売却額${fmt(proceeds)}円＞帳簿価額${fmt(book)}円→差額${fmt(gain)}円が固定資産売却益（収益↑）。普通預金（資産↑）借方、備品・固定資産売却益貸方。`
+        question: `取得原価${fmt(book * 3)}円、減価償却累計額${fmt(book * 2)}円の備品を${fmt(proceeds)}円で売却し、代金が普通預金に振り込まれた。`,
+        debit:  [{ account: '普通預金', amount: proceeds }, { account: '備品減価償却累計額', amount: book * 2 }],
+        credit: [{ account: '備品', amount: book * 3 }, { account: '固定資産売却益', amount: gain }],
+        explanation: `帳簿価額は${fmt(book * 3)}円−${fmt(book * 2)}円＝${fmt(book)}円。売却額${fmt(proceeds)}円との差額${fmt(gain)}円が固定資産売却益（収益）。減価償却累計額は借方で取り崩し、備品は取得原価で貸方に消す。`
       };
     }
   },
@@ -3688,11 +3692,9 @@ const TEMPLATE_VARIANTS = {
   ],
   // 備品売却→未収入金（益）
   30: [
-    (a) => `不用になった備品（帳簿価額${fmt(a)}円）を${fmt(Math.round(a * 1.2))}円で売却し、代金は月末に受け取る予定。`,
-    (a) => `帳簿価額${fmt(a)}円の備品を${fmt(Math.round(a * 1.2))}円で売却した。代金は後日受領。`,
-    (a) => `使用済み備品（帳簿価額${fmt(a)}円）を${fmt(Math.round(a * 1.2))}円で売却し、未収入金を計上した。`,
-    (a) => `旧型備品（簿価${fmt(a)}円）を${fmt(Math.round(a * 1.2))}円で売却。代金は翌月受け取り予定。`,
-    (a) => `備品（帳簿価額${fmt(a)}円）を売却額${fmt(Math.round(a * 1.2))}円で処分し、未収入金を計上した。`,
+    (a) => `不用になった備品（取得原価${fmt(a * 3)}円、減価償却累計額${fmt(a * 2)}円）を${fmt(Math.round(a * 1.2))}円で売却し、代金は月末に受け取る予定。`,
+    (a) => `取得原価${fmt(a * 3)}円、減価償却累計額${fmt(a * 2)}円の備品を${fmt(Math.round(a * 1.2))}円で売却した。代金は後日受け取る。`,
+    (a) => `旧型の備品（取得原価${fmt(a * 3)}円、減価償却累計額${fmt(a * 2)}円）を${fmt(Math.round(a * 1.2))}円で売却し、代金は翌月受け取ることにした。`,
   ],
   // 未収入金→現金
   31: [
@@ -3705,11 +3707,8 @@ const TEMPLATE_VARIANTS = {
   ],
   // 備品帳簿価額売却→未収入金
   32: [
-    (a) => `備品（帳簿価額${fmt(a)}円）を帳簿価額と同額で売却し、代金は後日受け取る。`,
-    (a) => `帳簿価額${fmt(a)}円の備品をそのまま${fmt(a)}円で売却した。代金は後払い。`,
-    (a) => `備品（簿価${fmt(a)}円）を${fmt(a)}円で処分し、代金は翌月受領予定。`,
-    (a) => `簿価通り${fmt(a)}円で備品を売却した。代金は未収入金として計上。`,
-    (a) => `備品売却（${fmt(a)}円）を行い、代金を未収入金に計上した。`,
+    (a) => `備品（取得原価${fmt(a * 4)}円、減価償却累計額${fmt(a * 3)}円）を${fmt(a)}円で売却し、代金は後日受け取る。`,
+    (a) => `取得原価${fmt(a * 4)}円、減価償却累計額${fmt(a * 3)}円の備品を${fmt(a)}円で売却した。代金は翌月受け取る予定である。`,
   ],
   // 未収入金→普通預金
   33: [
@@ -3986,11 +3985,9 @@ const TEMPLATE_VARIANTS = {
   ],
   // 備品売却損
   66: [
-    (a) => `帳簿価額${fmt(a)}円の備品を${fmt(Math.round(a * 0.7))}円で売却し、代金は現金で受け取った。`,
-    (a) => `簿価${fmt(a)}円の備品を${fmt(Math.round(a * 0.7))}円で処分し、現金を受け取った。`,
-    (a) => `帳簿価額${fmt(a)}円のパソコンを${fmt(Math.round(a * 0.7))}円で売却した（現金受取）。`,
-    (a) => `備品（帳簿価額${fmt(a)}円）を売却し、売却代金${fmt(Math.round(a * 0.7))}円を現金で受け取った。`,
-    (a) => `不用備品（簿価${fmt(a)}円）を${fmt(Math.round(a * 0.7))}円で売却し、現金を受領した。`,
+    (a) => `取得原価${fmt(a * 2)}円、減価償却累計額${fmt(a)}円の備品を${fmt(Math.round(a * 0.7))}円で売却し、代金は現金で受け取った。`,
+    (a) => `備品として使っていたパソコン（取得原価${fmt(a * 2)}円、減価償却累計額${fmt(a)}円）を${fmt(Math.round(a * 0.7))}円で売却し、現金を受け取った。`,
+    (a) => `不用になった備品（取得原価${fmt(a * 2)}円、減価償却累計額${fmt(a)}円）を売却し、代金${fmt(Math.round(a * 0.7))}円を現金で受け取った。`,
   ],
   // 消耗品費→現金
   67: [
