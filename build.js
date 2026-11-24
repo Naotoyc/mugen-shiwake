@@ -631,18 +631,17 @@ function mockPage(exam) {
 
 // ランダム（開くたびに15問を選び直す）。問題はブラウザで questions.js から作る。
 // 中身が毎回変わるので検索の対象にはせず、canonical は一覧に向け、sitemap にも入れない。
-const RANDOM_COUNT = 5;
-function randomPage(k) {
+function randomPage() {
   const url = `${SITE_URL}mock/`;
-  const title = `簿記3級 第1問 模擬試験 ランダム${k}（開くたびに問題が変わる）【${SITE_NAME}】`;
+  const title = `簿記3級 第1問 模擬試験 ランダム（開くたびに問題が変わる）【${SITE_NAME}】`;
   const description = `簿記3級 第1問（仕訳15問・45点満点）の模擬試験です。開くたびに54論点から15問を選び直します。目標時間は15分。`;
-  const crumbs = [{ name: SITE_NAME, href: '../../', url: SITE_URL }, { name: '模擬試験', href: '../', url }, { name: `ランダム${k}`, url }];
+  const crumbs = [{ name: SITE_NAME, href: '../../', url: SITE_URL }, { name: '模擬試験', href: '../', url }, { name: 'ランダム', url }];
   const jsonLd = { '@context': 'https://schema.org', '@graph': [breadcrumbJsonLd(crumbs)] };
   const conf = { random: true, similar: SIMILAR_ACCOUNTS, slugs: SLUGS, size: MOCK_SIZE, options: MOCK_OPTIONS };
   return head({ title, description, canonical: url, jsonLd, cssPrefix: '../../', current: 'mock' }) +
     breadcrumbs(crumbs) + `
   <section class="intro mock-intro">
-    <h1>簿記3級 第1問 模擬試験 ランダム${k}<span class="h1-sub">15問・1問3点・45点満点・目標15分・開くたびに問題が変わります</span></h1>
+    <h1>簿記3級 第1問 模擬試験 ランダム<span class="h1-sub">15問・1問3点・45点満点・目標15分・開くたびに問題が変わります</span></h1>
     <p>54論点から15問を選び直して出題します。各問の選択肢から勘定科目を選び、金額を入力してください。「開始する」を押すと時間を計り始めます。</p>
     <button class="btn btn-next" id="mock-start" type="button">開始する</button>
   </section>
@@ -651,7 +650,7 @@ function randomPage(k) {
     <span class="mock-target">目標 ${MOCK_TARGET_MIN}:00</span>
     <span class="mock-progress" id="mock-progress">0 / ${MOCK_SIZE}問</span>
   </div>
-  <main id="mock-main" data-exam="r${k}" data-target="${MOCK_TARGET_MIN * 60}">
+  <main id="mock-main" data-exam="random" data-target="${MOCK_TARGET_MIN * 60}">
     <ol class="mock-list" id="mock-list"></ol>
     <button class="btn btn-check" id="mock-submit" type="button" disabled>採点する</button>
     <section class="mock-result" id="mock-result" hidden role="dialog" aria-live="polite" aria-label="採点結果"></section>
@@ -683,7 +682,7 @@ function mockIndexPage() {
   <main>
     <h2 class="section-title">ランダム（開くたびに問題が変わる）</h2>
     <ul class="mock-index">
-      ${Array.from({ length: RANDOM_COUNT }, (_, i) => i + 1).map(k => `<li><a href="r${k}/"><span class="mock-index-title">ランダム${k}</span><span class="mock-index-topics">54論点から15問を毎回選び直します</span><span class="mock-index-best" data-best="r${k}"></span></a></li>`).join('\n      ')}
+      <li><a href="random/"><span class="mock-index-title">ランダム</span><span class="mock-index-topics">54論点から15問を毎回選び直します</span><span class="mock-index-best" data-best="random"></span></a></li>
     </ul>
     <h2 class="section-title">第1回から第${MOCK_COUNT}回（問題は固定）</h2>
     <ul class="mock-index">
@@ -716,10 +715,8 @@ for (const name of topicNames) {
 fs.rmSync(MOCK_DIR, { recursive: true, force: true });
 fs.mkdirSync(MOCK_DIR, { recursive: true });
 fs.writeFileSync(path.join(MOCK_DIR, 'index.html'), mockIndexPage());
-for (let k = 1; k <= RANDOM_COUNT; k++) {
-  fs.mkdirSync(path.join(MOCK_DIR, `r${k}`), { recursive: true });
-  fs.writeFileSync(path.join(MOCK_DIR, `r${k}`, 'index.html'), randomPage(k));
-}
+fs.mkdirSync(path.join(MOCK_DIR, 'random'), { recursive: true });
+fs.writeFileSync(path.join(MOCK_DIR, 'random', 'index.html'), randomPage());
 for (const e of MOCKS) {
   fs.mkdirSync(path.join(MOCK_DIR, String(e.n)), { recursive: true });
   fs.writeFileSync(path.join(MOCK_DIR, String(e.n), 'index.html'), mockPage(e));
