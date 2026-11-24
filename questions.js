@@ -3357,7 +3357,7 @@ const QUESTION_TEMPLATES = [
   {
     id: 277, topic: '受取商品券', tags: ['受取商品券', '普通預金', '精算'],
     generate: (a) => ({
-      question: `保有する商品券${fmt(a)}円を精算に出し、同額が普通預金に振り込まれた。`,
+      question: `保有する自治体発行の商品券${fmt(a)}円を精算し、同額が普通預金口座に振り込まれた。`,
       debit:  [{ account: '普通預金',   amount: a }],
       credit: [{ account: '受取商品券', amount: a }],
       explanation: '普通預金（資産↑）借方、受取商品券（資産↓）貸方。債権が現金化される。'
