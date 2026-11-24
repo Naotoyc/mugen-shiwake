@@ -148,9 +148,22 @@ a.cta {
 .mock-none { font-size: .85rem; color: var(--text-sub); }
 .mock-links { display: flex; flex-wrap: wrap; gap: 12px; font-size: .85rem; margin-top: 8px; }
 .mock-links a, .mock-wrong a, .mock-pager a { color: var(--accent); }
+/* 採点結果は、問題の上に浮かぶ小窓で出す（一番下までスクロールしなくてよい） */
 .mock-result {
+  position: fixed; z-index: 40; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px)); max-height: calc(100vh - 48px); overflow-y: auto;
   background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow); padding: 16px; margin: 16px 0; line-height: 1.7; font-size: .9rem; scroll-margin-top: 56px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.28); padding: 16px; line-height: 1.7; font-size: .9rem;
+}
+.mock-result-close {
+  position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border: 0; border-radius: 50%;
+  background: var(--bg); color: var(--text-sub); font-size: 1.1rem; cursor: pointer;
+}
+.mock-result .btn { margin-top: 8px; }
+.mock-result-fab {
+  position: fixed; z-index: 30; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom));
+  padding: 10px 16px; border: 0; border-radius: 999px; background: var(--accent); color: #fff;
+  font-weight: 700; font-size: .9rem; box-shadow: 0 4px 14px rgba(0,0,0,.25); cursor: pointer;
 }
 .mock-score { font-size: 2.4rem; font-weight: 800; text-align: center; }
 .mock-score span { font-size: 1rem; font-weight: 600; color: var(--text-sub); margin-left: 4px; }

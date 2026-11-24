@@ -6,7 +6,6 @@
   if (!main) return;
   const EXAM = main.dataset.exam;
   const TARGET = parseInt(main.dataset.target, 10);
-  const QS = JSON.parse(document.getElementById('mock-data').textContent);
   const KEY = 'mugen_mock_' + EXAM;
   const $ = id => document.getElementById(id);
   const yen = n => n.toLocaleString('ja-JP');
@@ -17,6 +16,51 @@
   }
 
   let startAt = 0, tick = null, finished = false;
+  let QS = [];
+
+  // ランダム: questions.js（QUESTION_TEMPLATES・ACCOUNT_LIST・randAmt）から15問を選ぶ。
+  // 1回の中で同じ論点は出さない。「仕訳の基本」は本番に出ない総論なので除く。
+  function randomQuestions(conf) {
+    const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+    const byTopic = {};
+    QUESTION_TEMPLATES.forEach(t => { if (t.topic !== '仕訳の基本') (byTopic[t.topic] = byTopic[t.topic] || []).push(t); });
+    return shuffle(Object.keys(byTopic)).slice(0, conf.size).map((topic, i) => {
+      const list = byTopic[topic];
+      const tmpl = list[Math.floor(Math.random() * list.length)];
+      const amt = tmpl.generate.length > 0 ? randAmt() : 0;
+      const q = tmpl.generate.length > 0 ? tmpl.generate(amt) : tmpl.generate();
+      if (tmpl.variants && tmpl.variants.length && tmpl.generate.length > 0) {
+        const v = tmpl.variants[Math.floor(Math.random() * tmpl.variants.length)];
+        q.question = typeof v === 'function' ? v(amt) : v;
+      }
+      const correct = [...new Set([...q.debit, ...q.credit].map(e => e.account))];
+      const seen = new Set(correct), pool = [];
+      correct.forEach(a => (conf.similar[a] || []).forEach(s => { if (!seen.has(s)) { pool.push(s); seen.add(s); } }));
+      const need = Math.max(conf.options, correct.length + 2) - correct.length;
+      let filler = shuffle(pool).slice(0, need);
+      if (filler.length < need) filler = filler.concat(shuffle(ACCOUNT_LIST.filter(a => !seen.has(a))).slice(0, need - filler.length));
+      return { no: i + 1, topic, slug: conf.slugs[topic] || '', question: q.question, debit: q.debit, credit: q.credit,
+               explanation: q.explanation, options: shuffle([...correct, ...filler]) };
+    });
+  }
+  function renderList(qs) {
+    $('mock-list').innerHTML = qs.map(q => `<li class="mock-q" id="q${q.no}" data-no="${q.no}">
+        <div class="mock-q-head"><span class="mock-q-no">第${q.no}問</span><span class="mock-q-mark" aria-live="polite"></span></div>
+        <p class="mock-q-text">${escHtml(q.question)}</p>
+        <p class="mock-q-options">選択肢：${q.options.map(escHtml).join('、')}</p>
+        <fieldset class="mock-entry journal-input-wrap" disabled>
+          <div class="journal-input-block"><div class="input-side-label debit-label">借方</div><div class="mock-rows" data-side="debit"></div><button class="btn-add-row" type="button" data-add="debit">＋ 行追加</button></div>
+          <div class="input-divider"></div>
+          <div class="journal-input-block"><div class="input-side-label credit-label">貸方</div><div class="mock-rows" data-side="credit"></div><button class="btn-add-row" type="button" data-add="credit">＋ 行追加</button></div>
+        </fieldset>
+        <div class="mock-answer" hidden></div>
+      </li>`).join('');
+  }
+
+  const DATA = JSON.parse(document.getElementById('mock-data').textContent);
+  const RANDOM = !Array.isArray(DATA) && DATA.random;
+  QS = RANDOM ? randomQuestions(DATA) : DATA;
+  if (RANDOM) renderList(QS);
 
   function amountInput() {
     const inp = document.createElement('input');
@@ -133,6 +177,7 @@
     if (isBest) { try { localStorage.setItem(KEY, JSON.stringify({ score, sec, at: Date.now() })); } catch (e) { /* noop */ } }
     const topicsWrong = [...new Set(wrong.map(q => q.topic))];
     $('mock-result').innerHTML =
+      `<button class="mock-result-close" id="mock-result-close" type="button" aria-label="閉じる">×</button>` +
       `<div class="mock-score">${score}<span>/ 45点</span></div>` +
       `<p class="mock-score-sub">${correct}問正解（全${QS.length}問）・かかった時間 ${mmss(sec)}</p>` +
       `<p>${over ? `目標の${TARGET / 60}分を ${mmss(sec - TARGET)} 超えました。満点でも時間がかかっていれば、本番では第2問と第3問の時間が足りなくなります。` : `目標の${TARGET / 60}分以内に解き終えました。`}</p>` +
@@ -141,10 +186,15 @@
         const q = wrong.find(w => w.topic === t);
         return `<li><a href="../../topics/${q.slug}/">${escHtml(t)}</a></li>`;
       }).join('')}</ul>` : '<p>全問正解です。</p>') +
-      `<button class="btn btn-next" id="mock-retry" type="button">もう一度解く</button>`;
+      (RANDOM ? `<button class="btn btn-next" id="mock-new" type="button">新しい15問で解く</button>` : '') +
+      `<button class="btn ${RANDOM ? 'btn-check' : 'btn-next'}" id="mock-retry" type="button">同じ問題でもう一度解く</button>`;
     $('mock-result').hidden = false;
-    $('mock-retry').addEventListener('click', () => { window.scrollTo({ top: 0 }); start(); });
-    $('mock-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('mock-result-fab').textContent = `結果 ${score}/45点`;
+    $('mock-result-fab').hidden = false;
+    $('mock-result-close').addEventListener('click', () => { $('mock-result').hidden = true; });
+    $('mock-result').querySelectorAll('a').forEach(a => a.addEventListener('click', () => { $('mock-result').hidden = true; }));
+    $('mock-retry').addEventListener('click', () => { $('mock-result').hidden = true; $('mock-result-fab').hidden = true; window.scrollTo({ top: 0 }); start(); });
+    if (RANDOM) $('mock-new').addEventListener('click', () => { window.scrollTo({ top: 0 }); location.reload(); });
     track('mock_finish', { exam: EXAM, score, seconds: sec, over_target: over ? 1 : 0 });
   }
 
@@ -156,5 +206,6 @@
     add.parentNode.querySelector('.mock-rows').append(row(q.options));
   });
   $('mock-start').addEventListener('click', start);
+  $('mock-result-fab').addEventListener('click', () => { $('mock-result').hidden = false; });
   $('mock-submit').addEventListener('click', submit);
 })();
