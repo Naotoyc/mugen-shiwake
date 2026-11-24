@@ -13,7 +13,7 @@ const { TOPIC_CONTENT } = require('./topics-content.js');
 const crypto = require('crypto');
 // キャッシュ対策: アセット内容のハッシュを ?v= に付ける（index.html / about.html にも書き戻す）
 const ASSET_V = crypto.createHash('sha1').update(Buffer.concat(
-  ['style.css', 'topics.css', 'script.js', 'affiliates.js', 'questions.js'].map(f => fs.readFileSync(path.join(__dirname, f)))
+  ['style.css', 'topics.css', 'script.js', 'affiliates.js', 'questions.js', 'mock.js'].map(f => fs.readFileSync(path.join(__dirname, f)))
 )).digest('hex').slice(0, 8);
 const SITE_URL   = 'https://naotoyc.github.io/mugen-shiwake/';
 const SITE_NAME  = '無限仕訳';
@@ -213,6 +213,7 @@ function siteNav(cssPrefix, current, appHref) {
   const cls = k => `class="site-nav-tab${current === k ? ' is-current' : ''}"${current === k ? ' aria-current="page"' : ''}`;
   return `<nav class="site-nav" aria-label="メイン">
     <a ${cls('app')} href="${appHref || cssPrefix}">練習する</a>
+    <a ${cls('mock')} href="${cssPrefix}mock/">模擬試験</a>
     <a ${cls('topics')} href="${cssPrefix}topics/">論点解説</a>
   </nav>`;
 }
@@ -509,6 +510,159 @@ function indexPage() {
   </main>` + foot('../');
 }
 
+// ── 第1問 模擬試験（全10回・各15問） ──
+// 本番の第1問と同じ 15問・1問3点・45点満点。目標時間は15分（2026-11-25 ユーザー決定）。
+// 中身は毎回同じにする（seed は回の番号）。論点は10回全体でなるべく均等に出す。
+const MOCK_COUNT = 10, MOCK_SIZE = 15, MOCK_TARGET_MIN = 15, MOCK_OPTIONS = 6;
+const MOCK_DIR = path.join(__dirname, 'mock');
+// script.js の SIMILAR_ACCOUNTS（選択肢の候補）をそのまま使う
+const SIMILAR_ACCOUNTS = (() => {
+  const src = fs.readFileSync(path.join(__dirname, 'script.js'), 'utf8');
+  const m = src.match(/const SIMILAR_ACCOUNTS = (\{[\s\S]*?\n\});/);
+  if (!m) throw new Error('script.js から SIMILAR_ACCOUNTS を読めません');
+  return Function(`return ${m[1]}`)();
+})();
+const { ACCOUNT_LIST } = require('./questions.js');
+// 模擬試験に出さない問題（2026-11-25 時点で内容に疑いがあるもの）
+//   190: 備品の除却を雑損で処理している（除却は2級の範囲で、科目は固定資産除却損）
+//   195: 問題文の言い換えに「法人住民税」があり、正解が租税公課になっている（法人の住民税・事業税は法人税等）
+const MOCK_EXCLUDE = new Set([190, 195]);
+const MOCK_AMOUNTS = [60000, 120000, 180000, 240000, 300000, 360000, 480000, 600000, 720000, 900000];
+
+function mockOptions(q, rnd) {
+  const correct = [...new Set([...q.debit, ...q.credit].map(e => e.account))];
+  const seen = new Set(correct);
+  const pool = [];
+  for (const acc of correct) for (const s of SIMILAR_ACCOUNTS[acc] || []) if (!seen.has(s)) { pool.push(s); seen.add(s); }
+  const shuffle = arr => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+  const need = Math.max(MOCK_OPTIONS, correct.length + 2) - correct.length;
+  let filler = shuffle(pool).slice(0, need);
+  if (filler.length < need) filler = filler.concat(shuffle(ACCOUNT_LIST.filter(a => !seen.has(a))).slice(0, need - filler.length));
+  return shuffle([...correct, ...filler]);
+}
+
+function buildMocks() {
+  const names = topicNames.filter(n => n !== '仕訳の基本');   // 本番に出ない総論の論点は除く
+  const used = new Map(names.map(n => [n, 0]));
+  const usedTmpl = new Set();
+  const exams = [];
+  for (let n = 1; n <= MOCK_COUNT; n++) {
+    const rnd = seededRandom(20261125 + n * 101);
+    // 出題回数の少ない論点から選ぶ（同じ回数なら乱数で）
+    const pick = names.map(name => [name, used.get(name), rnd()])
+      .sort((a, b) => a[1] - b[1] || a[2] - b[2]).slice(0, MOCK_SIZE).map(x => x[0]);
+    // 出題順は乱数で混ぜる（本番も論点の順番は決まっていない）
+    for (let i = pick.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [pick[i], pick[j]] = [pick[j], pick[i]]; }
+    const qs = pick.map((topic, i) => {
+      used.set(topic, used.get(topic) + 1);
+      const tmpls = topics.get(topic).templates.filter(t => !MOCK_EXCLUDE.has(t.id));
+      const fresh = tmpls.filter(t => !usedTmpl.has(t.id));
+      const tmpl = (fresh.length ? fresh : tmpls)[Math.floor(rnd() * (fresh.length || tmpls.length))];
+      usedTmpl.add(tmpl.id);
+      const orig = Math.random;
+      Math.random = seededRandom(n * 100003 + i * 7919 + tmpl.id);
+      let q;
+      try {
+        const amt = MOCK_AMOUNTS[Math.floor(rnd() * MOCK_AMOUNTS.length)];
+        q = tmpl.generate.length > 0 ? tmpl.generate(amt) : tmpl.generate();
+        if (tmpl.variants && tmpl.variants.length && tmpl.generate.length > 0) {
+          const v = tmpl.variants[Math.floor(Math.random() * tmpl.variants.length)];
+          q.question = typeof v === 'function' ? v(amt) : v;
+        }
+      } finally { Math.random = orig; }
+      const dr = q.debit.reduce((s, e) => s + e.amount, 0), cr = q.credit.reduce((s, e) => s + e.amount, 0);
+      if (dr !== cr || dr <= 0) throw new Error(`模擬試験 第${n}回 ${i + 1}問目（id ${tmpl.id}）の貸借が一致しません`);
+      return { no: i + 1, id: tmpl.id, topic, slug: SLUGS[topic], question: q.question,
+               debit: q.debit, credit: q.credit, explanation: q.explanation, options: mockOptions(q, rnd),
+               difficulty: difficultyOf(tmpl, q) };
+    });
+    exams.push({ n, questions: qs });
+  }
+  return exams;
+}
+const MOCKS = buildMocks();
+
+function mockPage(exam) {
+  const url = `${SITE_URL}mock/${exam.n}/`;
+  const title = `簿記3級 第1問 模擬試験 第${exam.n}回（15問・45点満点・目標15分）【${SITE_NAME}】`;
+  const description = `簿記3級 第1問（仕訳15問）の模擬試験 第${exam.n}回です。本番と同じ15問・1問3点・45点満点で、目標時間は15分。採点後に解説と論点ページへのリンクで復習できます。無料・登録不要。`;
+  const crumbs = [{ name: SITE_NAME, href: '../../', url: SITE_URL }, { name: '模擬試験', href: '../', url: `${SITE_URL}mock/` }, { name: `第${exam.n}回`, url }];
+  const jsonLd = { '@context': 'https://schema.org', '@graph': [
+    { '@type': 'Quiz', name: title, description, url, inLanguage: 'ja', educationalLevel: '日商簿記3級', about: '仕訳' },
+    breadcrumbJsonLd(crumbs) ] };
+  const data = exam.questions.map(q => ({ no: q.no, topic: q.topic, slug: q.slug, question: q.question,
+    debit: q.debit, credit: q.credit, explanation: q.explanation, options: q.options }));
+  const prev = exam.n > 1 ? `<a href="../${exam.n - 1}/">第${exam.n - 1}回</a>` : '';
+  const next = exam.n < MOCK_COUNT ? `<a href="../${exam.n + 1}/">第${exam.n + 1}回</a>` : '';
+  return head({ title, description, canonical: url, jsonLd, cssPrefix: '../../', current: 'mock' }) +
+    breadcrumbs(crumbs) + `
+  <section class="intro mock-intro">
+    <h1>簿記3級 第1問 模擬試験 第${exam.n}回<span class="h1-sub">15問・1問3点・45点満点・目標15分</span></h1>
+    <p>本番の第1問と同じ形式です。各問の選択肢から勘定科目を選び、金額を入力してください。「開始する」を押すと時間を計り始めます。</p>
+    <button class="btn btn-next" id="mock-start" type="button">開始する</button>
+  </section>
+  <div class="mock-bar" id="mock-bar" hidden>
+    <span class="mock-timer" id="mock-timer">0:00</span>
+    <span class="mock-target">目標 ${MOCK_TARGET_MIN}:00</span>
+    <span class="mock-progress" id="mock-progress">0 / ${MOCK_SIZE}問</span>
+  </div>
+  <main id="mock-main" data-exam="${exam.n}" data-target="${MOCK_TARGET_MIN * 60}">
+    <ol class="mock-list">
+      ${exam.questions.map(q => `<li class="mock-q" id="q${q.no}" data-no="${q.no}">
+        <div class="mock-q-head"><span class="mock-q-no">第${q.no}問</span><span class="mock-q-mark" aria-live="polite"></span></div>
+        <p class="mock-q-text">${esc(q.question)}</p>
+        <p class="mock-q-options">選択肢：${q.options.map(esc).join('、')}</p>
+        <fieldset class="mock-entry journal-input-wrap" disabled>
+          <div class="journal-input-block"><div class="input-side-label debit-label">借方</div><div class="mock-rows" data-side="debit"></div><button class="btn-add-row" type="button" data-add="debit">＋ 行追加</button></div>
+          <div class="input-divider"></div>
+          <div class="journal-input-block"><div class="input-side-label credit-label">貸方</div><div class="mock-rows" data-side="credit"></div><button class="btn-add-row" type="button" data-add="credit">＋ 行追加</button></div>
+        </fieldset>
+        <div class="mock-answer" hidden></div>
+      </li>`).join('\n      ')}
+    </ol>
+    <button class="btn btn-check" id="mock-submit" type="button" disabled>採点する</button>
+    <section class="mock-result" id="mock-result" hidden aria-live="polite"></section>
+    <nav class="mock-pager">${prev}<a href="../">模擬試験の一覧</a>${next}</nav>
+    ${affiliateBlock('仕訳以外も含めて仕上げるなら', 'mock')}
+  </main>
+  <script type="application/json" id="mock-data">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>
+  <script src="../../mock.js?v=${ASSET_V}" defer></script>` + foot('../../');
+}
+
+function mockIndexPage() {
+  const url = `${SITE_URL}mock/`;
+  const title = `簿記3級 第1問 模擬試験（全${MOCK_COUNT}回・各15問・目標15分）【${SITE_NAME}】`;
+  const description = `簿記3級 第1問（仕訳15問・45点満点）の模擬試験を${MOCK_COUNT}回分、無料で解けます。本番と同じ形式で時間を計り、採点後は解説と論点ページで復習できます。登録不要・スマホ対応。`;
+  const crumbs = [{ name: SITE_NAME, href: '../', url: SITE_URL }, { name: '模擬試験', url }];
+  const jsonLd = { '@context': 'https://schema.org', '@graph': [
+    { '@type': 'CollectionPage', name: title, description, url, inLanguage: 'ja', dateModified: BUILD_DATE,
+      hasPart: MOCKS.map(e => ({ '@type': 'Quiz', name: `第1問 模擬試験 第${e.n}回`, url: `${url}${e.n}/` })) },
+    breadcrumbJsonLd(crumbs) ] };
+  return head({ title, description, canonical: url, jsonLd, cssPrefix: '../', current: 'mock' }) +
+    breadcrumbs(crumbs) + `
+  <section class="intro">
+    <h1>簿記3級 第1問 模擬試験<span class="h1-sub">全${MOCK_COUNT}回・各15問・45点満点・目標15分</span></h1>
+    <p>第1問は仕訳15問・45点で、試験全体の配点の半分近くを占めます。本番と同じ15問を、目標の15分で解き切る練習用です。</p>
+    <p>どの回も中身は固定なので、間違えた回を何度でも解き直せます。自分の最高点は、この端末に記録されます。</p>
+  </section>
+  <main>
+    <ul class="mock-index">
+      ${MOCKS.map(e => `<li><a href="${e.n}/"><span class="mock-index-title">第${e.n}回</span><span class="mock-index-topics">${e.questions.slice(0, 4).map(q => esc(q.topic)).join('・')} ほか</span><span class="mock-index-best" data-best="${e.n}"></span></a></li>`).join('\n      ')}
+    </ul>
+    <a class="btn btn-next cta" href="../">論点を選んで反復練習する →</a>
+  </main>
+  <script>
+  (function () {
+    document.querySelectorAll('[data-best]').forEach(function (el) {
+      try {
+        var r = JSON.parse(localStorage.getItem('mugen_mock_' + el.dataset.best) || 'null');
+        if (r) el.textContent = '最高 ' + r.score + '点（' + Math.floor(r.sec / 60) + '分' + (r.sec % 60) + '秒）';
+      } catch (e) { /* noop */ }
+    });
+  })();
+  </script>` + foot('../');
+}
+
 // ── 出力 ──
 fs.rmSync(OUT_DIR, { recursive: true, force: true });
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -519,10 +673,20 @@ for (const name of topicNames) {
   fs.writeFileSync(path.join(dir, 'index.html'), topicPage(name));
 }
 
+fs.rmSync(MOCK_DIR, { recursive: true, force: true });
+fs.mkdirSync(MOCK_DIR, { recursive: true });
+fs.writeFileSync(path.join(MOCK_DIR, 'index.html'), mockIndexPage());
+for (const e of MOCKS) {
+  fs.mkdirSync(path.join(MOCK_DIR, String(e.n)), { recursive: true });
+  fs.writeFileSync(path.join(MOCK_DIR, String(e.n), 'index.html'), mockPage(e));
+}
+
 const urls = [
   { loc: SITE_URL, priority: '1.0' },
   { loc: `${SITE_URL}topics/`, priority: '0.8' },
   ...topicNames.map(n => ({ loc: `${SITE_URL}topics/${SLUGS[n]}/`, priority: '0.7' })),
+  { loc: `${SITE_URL}mock/`, priority: '0.8' },
+  ...MOCKS.map(e => ({ loc: `${SITE_URL}mock/${e.n}/`, priority: '0.7' })),
 ];
 fs.writeFileSync(path.join(__dirname, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -538,4 +702,5 @@ for (const f of ['index.html', 'about.html']) {
   const after = before.replace(/((?:href|src)=")((?:style|topics)\.css|(?:script|affiliates|questions)\.js)(?:\?v=[^"]*)?"/g, `$1$2?v=${ASSET_V}"`);
   if (after !== before) fs.writeFileSync(fp, after);
 }
+console.log(`mock: ${MOCKS.length} exams`);
 console.log(`topics: ${topicNames.length} pages, examples: ${QUESTION_TEMPLATES.length}, sitemap: ${urls.length} urls`);
