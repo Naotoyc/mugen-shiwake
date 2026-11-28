@@ -11680,5 +11680,490 @@
    "gsc_error": false,
    "end": "2026-11-26"
   }
+ },
+ {
+  "date": "2026-11-28",
+  "ga_range": [
+   "2026-11-21",
+   "2026-11-27"
+  ],
+  "gsc_range": [
+   "2026-11-19",
+   "2026-11-25"
+  ],
+  "cur": {
+   "sessions": 7,
+   "sessions_ext": 7,
+   "pv": 9,
+   "pv_ext": 9,
+   "users": 6,
+   "users_ext": 6,
+   "new_users": 6,
+   "new_users_ext": 6,
+   "bot_users": 0,
+   "bot_pv": 0,
+   "affiliate_view": 4,
+   "affiliate_click": 1,
+   "topic_page_to_app": 0,
+   "affiliate_viewers": 1,
+   "gsc_impressions": 248,
+   "gsc_clicks": 3
+  },
+  "prev": {
+   "sessions": 19,
+   "sessions_ext": 19,
+   "pv": 41,
+   "pv_ext": 41,
+   "users": 16,
+   "users_ext": 16,
+   "new_users": 16,
+   "new_users_ext": 16,
+   "bot_users": 101,
+   "bot_pv": 101,
+   "affiliate_view": 108,
+   "affiliate_click": 0,
+   "topic_page_to_app": 3,
+   "affiliate_viewers": 8,
+   "gsc_impressions": 67,
+   "gsc_clicks": 1
+  },
+  "queries": [
+   {
+    "key": "損益振替",
+    "impressions": 7,
+    "clicks": 0,
+    "position": 7
+   },
+   {
+    "key": "損益振替とは",
+    "impressions": 5,
+    "clicks": 0,
+    "position": 10.2
+   },
+   {
+    "key": "繰越利益剰余金 求め方 3級",
+    "impressions": 3,
+    "clicks": 0,
+    "position": 7
+   },
+   {
+    "key": "site:github.io",
+    "impressions": 2,
+    "clicks": 0,
+    "position": 34.5
+   },
+   {
+    "key": "前受収益",
+    "impressions": 2,
+    "clicks": 0,
+    "position": 60
+   }
+  ],
+  "pages": [
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/soneki-furikae/",
+    "impressions": 37,
+    "clicks": 0,
+    "position": 8.324324324324325
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/shiharai-yachin/",
+    "impressions": 26,
+    "clicks": 0,
+    "position": 9.961538461538462
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/toza-yokin/",
+    "impressions": 25,
+    "clicks": 0,
+    "position": 9.04
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/karibaraikin/",
+    "impressions": 14,
+    "clicks": 0,
+    "position": 6
+   },
+   {
+    "key": "https://naotoyc.github.io/mugen-shiwake/topics/kurikoshi-rieki-joyokin/",
+    "impressions": 10,
+    "clicks": 0,
+    "position": 6
+   }
+  ],
+  "gsc_error": false,
+  "notes": [
+   "・今週の詰まりは、「サイトを訪問する」の段階です。\n　理由は、訪問した人数が 6人で、基準の 30人に届いていないからです。\n\n　具体的には、4つの数字は、Google 検索に表示された回数 248回（前週は 67回）、訪問した人数 6人（前週は 16人）、教材カードを見た人数 1人（前週は 8人）、教材カードがクリックされた回数 1回（前週は 0回）でした。\n　Google 検索で表示が多い検索語は「損益振替、損益振替とは、繰越利益剰余金 求め方 3級」です。\n\n　そのため、表示が多い検索語の論点ページの題名と説明文を見直すべきです。"
+  ],
+  "daily": [
+   {
+    "date": "2026-10-31",
+    "new_users_ext": 1,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-11-01",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-02",
+    "new_users_ext": 0,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-11-03",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-04",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-05",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-06",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-07",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-08",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-09",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-10",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-11",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-12",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-13",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-14",
+    "new_users_ext": 3,
+    "users_ext": 3
+   },
+   {
+    "date": "2026-11-15",
+    "new_users_ext": 5,
+    "users_ext": 5
+   },
+   {
+    "date": "2026-11-16",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-17",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-18",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-19",
+    "new_users_ext": 4,
+    "users_ext": 4
+   },
+   {
+    "date": "2026-11-20",
+    "new_users_ext": 4,
+    "users_ext": 4
+   },
+   {
+    "date": "2026-11-21",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-22",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-11-23",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-11-24",
+    "new_users_ext": 1,
+    "users_ext": 1
+   },
+   {
+    "date": "2026-11-25",
+    "new_users_ext": 2,
+    "users_ext": 2
+   },
+   {
+    "date": "2026-11-26",
+    "new_users_ext": 0,
+    "users_ext": 0
+   },
+   {
+    "date": "2026-11-27",
+    "new_users_ext": 1,
+    "users_ext": 2
+   }
+  ],
+  "periods": {
+   "monthly": [
+    {
+     "sessions": 82,
+     "sessions_ext": 82,
+     "pv": 89,
+     "pv_ext": 89,
+     "users": 64,
+     "users_ext": 64,
+     "new_users": 64,
+     "new_users_ext": 64,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 2,
+     "gsc_clicks": 0,
+     "key": "2026-05",
+     "label": "2026年5月",
+     "start": "2026-05-01",
+     "end": "2026-05-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 0,
+     "sessions_ext": 0,
+     "pv": 109,
+     "pv_ext": 109,
+     "users": 0,
+     "users_ext": 0,
+     "new_users": 2,
+     "new_users_ext": 2,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 1,
+     "gsc_clicks": 0,
+     "key": "2026-06",
+     "label": "2026年6月",
+     "start": "2026-06-01",
+     "end": "2026-06-30",
+     "days": 30,
+     "partial": false
+    },
+    {
+     "sessions": 5,
+     "sessions_ext": 5,
+     "pv": 5,
+     "pv_ext": 5,
+     "users": 5,
+     "users_ext": 5,
+     "new_users": 3,
+     "new_users_ext": 3,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-07",
+     "label": "2026年7月",
+     "start": "2026-07-01",
+     "end": "2026-07-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 2,
+     "sessions_ext": 2,
+     "pv": 2,
+     "pv_ext": 2,
+     "users": 2,
+     "users_ext": 2,
+     "new_users": 1,
+     "new_users_ext": 1,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-08",
+     "label": "2026年8月",
+     "start": "2026-08-01",
+     "end": "2026-08-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 7,
+     "sessions_ext": 7,
+     "pv": 10,
+     "pv_ext": 10,
+     "users": 6,
+     "users_ext": 6,
+     "new_users": 5,
+     "new_users_ext": 5,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-09",
+     "label": "2026年9月",
+     "start": "2026-09-01",
+     "end": "2026-09-30",
+     "days": 30,
+     "partial": false
+    },
+    {
+     "sessions": 38,
+     "sessions_ext": 37,
+     "pv": 119,
+     "pv_ext": 117,
+     "users": 13,
+     "users_ext": 12,
+     "new_users": 9,
+     "new_users_ext": 9,
+     "affiliate_view": 28,
+     "affiliate_click": 0,
+     "topic_page_to_app": 3,
+     "affiliate_viewers": 6,
+     "gsc_impressions": 1,
+     "gsc_clicks": 0,
+     "key": "2026-10",
+     "label": "2026年10月",
+     "start": "2026-10-01",
+     "end": "2026-10-31",
+     "days": 31,
+     "partial": false
+    },
+    {
+     "sessions": 30,
+     "sessions_ext": 30,
+     "pv": 60,
+     "pv_ext": 60,
+     "users": 23,
+     "users_ext": 23,
+     "new_users": 22,
+     "new_users_ext": 22,
+     "affiliate_view": 120,
+     "affiliate_click": 1,
+     "topic_page_to_app": 3,
+     "affiliate_viewers": 11,
+     "gsc_impressions": 321,
+     "gsc_clicks": 4,
+     "key": "2026-11",
+     "label": "2026年11月",
+     "start": "2026-11-01",
+     "end": "2026-11-27",
+     "days": 27,
+     "partial": true
+    }
+   ],
+   "quarterly": [
+    {
+     "sessions": 78,
+     "sessions_ext": 78,
+     "pv": 198,
+     "pv_ext": 198,
+     "users": 51,
+     "users_ext": 51,
+     "new_users": 66,
+     "new_users_ext": 66,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 3,
+     "gsc_clicks": 0,
+     "key": "2026-Q2",
+     "label": "2026年4月から6月",
+     "start": "2026-04-01",
+     "end": "2026-06-30",
+     "days": 91,
+     "partial": false
+    },
+    {
+     "sessions": 14,
+     "sessions_ext": 14,
+     "pv": 17,
+     "pv_ext": 17,
+     "users": 11,
+     "users_ext": 11,
+     "new_users": 9,
+     "new_users_ext": 9,
+     "affiliate_view": 0,
+     "affiliate_click": 0,
+     "topic_page_to_app": 0,
+     "affiliate_viewers": 0,
+     "gsc_impressions": 0,
+     "gsc_clicks": 0,
+     "key": "2026-Q3",
+     "label": "2026年7月から9月",
+     "start": "2026-07-01",
+     "end": "2026-09-30",
+     "days": 92,
+     "partial": false
+    },
+    {
+     "sessions": 68,
+     "sessions_ext": 67,
+     "pv": 179,
+     "pv_ext": 177,
+     "users": 35,
+     "users_ext": 34,
+     "new_users": 31,
+     "new_users_ext": 31,
+     "affiliate_view": 148,
+     "affiliate_click": 1,
+     "topic_page_to_app": 6,
+     "affiliate_viewers": 16,
+     "gsc_impressions": 322,
+     "gsc_clicks": 4,
+     "key": "2026-Q4",
+     "label": "2026年10月から12月",
+     "start": "2026-10-01",
+     "end": "2026-11-27",
+     "days": 58,
+     "partial": true
+    }
+   ],
+   "gsc_error": false,
+   "end": "2026-11-27"
+  }
  }
 ]
